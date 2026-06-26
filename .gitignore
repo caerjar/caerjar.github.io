@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Editor / runtime
+*.log
+.env
+node_modules/
