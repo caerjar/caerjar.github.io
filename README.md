@@ -32,25 +32,36 @@ Every project page is written from that project's own `README.md` / `direction.m
 status, test counts, invariants, venues and dates included. Nothing on those pages is invented, so
 when a project's status changes, update the page from the source rather than from memory.
 
-The nine works with no repository are sourced from elsewhere and cited on their pages:
+The works with no repository are sourced from elsewhere and cited on their pages:
 
 | Work | Source |
 |---|---|
 | Evertunes | [opensea.io/evertunes-studio](https://opensea.io/evertunes-studio) — collection text, story titles, traits |
 | What the Tech | [visions2030.studio reel](https://www.instagram.com/reel/DTOUu3GExM4/) — Ethical Imagination |
-| Peat and Repeat | [peatandrepeat.org](http://peatandrepeat.org/) |
+| Heddatron | [Wikipedia](https://en.wikipedia.org/wiki/Heddatron) — cast, venue, robot credits |
+| Peat and Repeat | [peatandrepeat.org](https://www.peatandrepeat.org/who) |
+| Mugworts | [mugwortsherbalclinic.com](https://www.mugwortsherbalclinic.com/) |
+| Kokowa | [WIRED, Apr 2017](https://www.wired.com/2017/04/want-kick-putin-virtual-world-kokowa/) |
+| PAOM | [paom.com](https://paom.com/) |
+| 13Bit Productions | [13bit.com](https://www.13bit.com/) |
 | PGM Diagrams | `diagrammatic-immanence` and `machinic-hymns` in `~/caerjar` |
 
-**Prayer Coin, Unpaid Labor Coin, Emu Butch, Mugworts Free Herbal Clinic and Siliconkin have no
-source at all.** Their copy is drafted from the medium and the surrounding work, and should be
-replaced with the artist's own account. Do not treat it as a record of what those works are.
+Venues, fellowships and residencies were supplied by the artist and are shown in each page's meta
+block: HOPE and Ars Electronica (Sanctuary), Visions2030 (What the Tech), Sphinx (PGM Diagrams),
+Recurse Center (both coins), Banff (Emu Butch), DWeb / HOPE / Black Sky Crete (Mugworts).
+
+**Prayer Coin, Unpaid Labor Coin and Emu Butch still have drafted body copy** — the venue lines are
+real, but the prose around them is written from the medium, not from the artist's account. Replace
+it.
 
 ### Images
 
 `assets/img/` holds two kinds of file:
 
 - **Real documentation** — plates from `machinic-hymns`, string diagrams from
-  `diagrammatic-immanence`, screenshots from `dream`, sample inputs from `SigilStudio`.
+  `diagrammatic-immanence`, screenshots from `dream`, sample inputs from `SigilStudio`, the
+  Evertunes stills, and `app-*.jpg` screenshots of the two apps that have live demos
+  (Palimpsest, Sigil Studio) captured from caerjar.github.io.
 - **Generated plates** (`plate-<slug>.svg`) — for works with no documentation image. These are
   marks, not photographs: deterministic diagrams drawn in the site's own visual language, seeded
   from the slug. Two generators make them — `tools/plates.py` in ink only, and

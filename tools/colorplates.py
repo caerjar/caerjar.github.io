@@ -184,6 +184,87 @@ def plate(slug, label, corner, kind, spot, spot2=None):
                  f'<text x="158" y="364">PART</text><text x="310" y="364">PREPARATION</text>'
                  f'<text x="462" y="364">DOSE</text><text x="614" y="364">NOTE</text></g>')
 
+
+    elif kind == "stage":
+        # a plan of the stage: proscenium, five robot marks, cable runs to a control desk
+        p.append(f'<rect x="150" y="140" width="420" height="290" fill="none" stroke="{INK}"/>')
+        p.append(f'<line x1="150" y1="392" x2="570" y2="392" stroke="{LINE}" stroke-dasharray="4 6"/>')
+        marks = [(232, 214), (350, 190), (470, 226), (286, 320), (438, 336)]
+        for i, (x, y) in enumerate(marks):
+            p.append(f'<circle cx="{x}" cy="{y}" r="19" fill="{spot}" fill-opacity=".14" '
+                     f'stroke="{spot}" stroke-width="1.4"/>')
+            p.append(f'<circle cx="{x}" cy="{y}" r="3.5" fill="{INK}"/>')
+            p.append(f'<path d="M{x} {y+19} C{x} {y+70} {640} {y+40} {640} 300" fill="none" '
+                     f'stroke="{spot2}" stroke-width="1" stroke-opacity=".55"/>')
+            p.append(f'<text x="{x}" y="{y-26}" text-anchor="middle" '
+                     f'font-family="Courier New, monospace" font-size="10" fill="{DIM}">R{i+1}</text>')
+        p.append(f'<rect x="612" y="272" width="56" height="56" fill="none" stroke="{INK}"/>')
+        p.append(f'<text x="640" y="350" text-anchor="middle" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">CONTROL</text>')
+        p.append(f'<text x="360" y="452" text-anchor="middle" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">HOUSE</text>')
+
+    elif kind == "strip":
+        # a film strip: sprockets, frames, one frame pulled out and enlarged
+        y0 = 168
+        p.append(f'<rect x="130" y="{y0}" width="330" height="128" fill="none" stroke="{INK}"/>')
+        for k in range(12):
+            for yy in (y0 + 7, y0 + 110):
+                p.append(f'<rect x="{136+k*27}" y="{yy}" width="14" height="11" fill="{INK}" '
+                         f'fill-opacity=".5"/>')
+        for k in range(4):
+            p.append(f'<rect x="{140+k*79}" y="{y0+27}" width="70" height="74" fill="{spot}" '
+                     f'fill-opacity="{.10+.06*k:.2f}" stroke="{spot}" stroke-width="1"/>')
+        p.append(f'<path d="M219 {y0+101} L520 400 M289 {y0+101} L700 400" stroke="{LINE}" '
+                 f'stroke-width="1" fill="none" stroke-dasharray="3 5"/>')
+        p.append(f'<rect x="520" y="290" width="180" height="110" fill="{spot2}" fill-opacity=".12" '
+                 f'stroke="{spot2}" stroke-width="1.4"/>')
+        p.append(f'<text x="610" y="424" text-anchor="middle" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">ONE FRAME, HELD</text>')
+
+    elif kind == "world":
+        # a ground plane in perspective with placed objects and a viewer cone
+        hz = 236
+        p.append(f'<line x1="120" y1="{hz}" x2="680" y2="{hz}" stroke="{LINE}"/>')
+        for k in range(13):                     # receding grid
+            x = 120 + k * 46.7
+            p.append(f'<line x1="{x:.0f}" y1="452" x2="{400+(x-400)*.14:.0f}" y2="{hz}" '
+                     f'stroke="{spot}" stroke-width="1" stroke-opacity=".42"/>')
+        d = 0.0
+        for k in range(7):
+            d += (1 - d) * 0.30
+            y = hz + (452 - hz) * (1 - d)
+            p.append(f'<line x1="120" y1="{y:.0f}" x2="680" y2="{y:.0f}" stroke="{spot}" '
+                     f'stroke-width="1" stroke-opacity=".42"/>')
+        for x, y, w in ((250, 400, 46), (392, 356, 34), (516, 386, 40), (330, 300, 22), (588, 320, 26)):
+            p.append(f'<rect x="{x}" y="{y-w}" width="{w}" height="{w}" fill="{spot2}" '
+                     f'fill-opacity=".16" stroke="{spot2}" stroke-width="1.2"/>')
+        p.append(f'<path d="M400 496 L214 300 L586 300 Z" fill="none" stroke="{INK}" '
+                 f'stroke-dasharray="4 6"/>')
+        p.append(f'<circle cx="400" cy="496" r="5" fill="{INK}"/>')
+        p.append(f'<text x="400" y="522" text-anchor="middle" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">VIEWER</text>')
+
+    elif kind == "garment":        # a cut layout and the repeat that fills it
+        panels = [(150, 150, 120, 190), (286, 150, 96, 130), (286, 296, 96, 44),
+                  (150, 356, 120, 92), (398, 150, 74, 190)]
+        for x, y, w, h in panels:
+            p.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="none" '
+                     f'stroke="{INK}" stroke-width="1"/>')
+            p.append(f'<rect x="{x+7}" y="{y+7}" width="{w-14}" height="{h-14}" fill="none" '
+                     f'stroke="{LINE}" stroke-dasharray="3 4"/>')
+        for gx in range(4):                     # the repeat, tiled
+            for gy in range(4):
+                cx, cy = 530 + gx * 44, 172 + gy * 44
+                p.append(f'<rect x="{cx}" y="{cy}" width="40" height="40" fill="{spot}" '
+                         f'fill-opacity="{.09 + .05*((gx+gy) % 3):.2f}" stroke="{spot}" stroke-width="1"/>')
+                p.append(f'<circle cx="{cx+20}" cy="{cy+20}" r="{9 + 3*((gx*gy) % 3)}" fill="none" '
+                         f'stroke="{spot2}" stroke-width="1" stroke-opacity=".7"/>')
+        p.append(f'<text x="210" y="472" font-family="Courier New, monospace" font-size="10" '
+                 f'fill="{DIM}">CUT</text>')
+        p.append(f'<text x="590" y="368" text-anchor="middle" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">REPEAT · PRINTED TO ORDER</text>')
+
     else:  # "die" — a chip floorplan with a signal read off it
         p.append(f'<rect x="150" y="110" width="330" height="290" fill="none" stroke="{INK}"/>')
         blocks = [(168, 128, 120, 84), (300, 128, 162, 52), (300, 192, 78, 96),
@@ -218,7 +299,10 @@ PLATES = [
     ("what-the-tech",     "IDEA / CODE / RECORD",           "CONTRACT 01", "contract", "#2f5d7a", "#a33327"),
     ("peat-and-repeat",   "BOG / BED / EDITION",            "CORE 01",     "core",     "#6b4f2a", "#4f6b3a"),
     ("mugworts",          "PLANT / PART / DOSE",            "MATERIA 01",  "materia",  "#5c6b3a"),
-    ("siliconkin",        "DIE / BLOCK / SIGNAL",           "DIE 01",      "die",      "#5a4a7a", "#a33327"),
+    ("heddatron",         "STAGE / ROBOT / CUE",            "PLOT 01",     "stage",    "#a33327", "#4a6f88"),
+    ("thirteen-bit",      "FRAME / CUT / RELEASE",          "STRIP 01",    "strip",    "#2f6b6b", "#a8791f"),
+    ("kokowa",            "GROUND / OBJECT / VIEWER",       "WORLD 01",    "world",    "#4a4a8a", "#a3437a"),
+    ("paom",              "PANEL / REPEAT / ORDER",         "GARMENT 01",  "garment",  "#a3437a", "#2f5d7a"),
 ]
 
 if __name__ == "__main__":

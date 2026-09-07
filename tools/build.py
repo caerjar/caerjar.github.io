@@ -121,7 +121,7 @@ against.</p>""",
   links=[("Repository — private", None)]),
 
 dict(
-  slug="sanctuary-cell-division", num="02", title="Sanctuary Cell Division",
+  slug="sanctuary-cell-division", venue="Panel at HOPE — Hackers on Planet Earth, 2026<br>Presented at Ars Electronica 2026, Linz", num="02", title="Sanctuary Cell Division",
   sub="A knowledge stack an organization can run itself",
   year="2026", medium="infrastructure / network / software",
   status="v0.1 — single organization. Voice (v0.2) and federation (v0.3) designed for and flagged off",
@@ -139,6 +139,12 @@ change their terms.</p>
 <p>Sanctuary is the other arrangement: the model runs on your hardware, the archive stays on your
 disk, the agent speaks in your voice because you wrote its mission file, and sharing happens
 between organizations that have verified each other directly.</p>
+
+<h2>Where it has been shown</h2>
+<p>A panel at <b>HOPE — Hackers on Planet Earth</b>, 2026, and presented at <b>Ars Electronica
+2026</b> in Linz. The two rooms want different halves of the same argument: HOPE cares whether the
+thing actually runs on hardware you control, and Ars Electronica cares what it means that an
+organization can now hold its own model. The project has to answer both to be worth anything.</p>
 
 <h2>How it is set up</h2>
 <p>Requires Docker. Nothing else is installed on the machine.</p>
@@ -213,7 +219,8 @@ dict(
        "dossier in your browser: a color-coded reading copy you can edit and save, a parts board, a "
        "copyedit review, a back-of-book index, and the motifs you name. Then it exports the whole "
        "thing to PDF, Word, HTML, or Markdown.",
-  imgs=[("assets/img/plate-palimpsest.svg", "Section, revision, index — the manuscript as strata.", False)],
+  imgs=[("assets/img/app-palimpsest.jpg", "The writing record: a session measured, drawn as notation, and played back.", False),
+        ("assets/img/plate-palimpsest.svg", "Section, revision, index — the manuscript as strata.", False)],
   prose="""<h2>The arrangement</h2>
 <p>Fully deterministic: no accounts, no network. Your writing never leaves your machine.</p>
 <p>Everything the app uses — pandoc, XeLaTeX and its fonts, git — is baked into the image, so none
@@ -236,7 +243,8 @@ dict(
   blurb="Four engines that redraw an uploaded image entirely out of letterforms. Runs client-side; no backend.",
   lead="Upload an image, paste text, pick an engine, adjust the detail, export SVG or PNG. "
        "Everything runs client-side in the browser — no backend, no network calls.",
-  imgs=[("assets/img/sigil-split-rock.jpg", "Split rock — one of the sample inputs bundled with the app.", False),
+  imgs=[("assets/img/app-sigil-studio.jpg", "Contour trace: the photograph below, redrawn entirely in the letterforms of a text about Cantor.", False),
+        ("assets/img/sigil-split-rock.jpg", "Split rock — one of the sample inputs bundled with the app.", False),
         ("assets/img/sigil-marks-sheet.jpg", "Marks sheet — a second sample input, chosen for its tonal range.", False)],
   prose="""<h2>The four engines</h2>
 <ul>
@@ -336,37 +344,6 @@ the sound it deliberately lacks.</p>""",
   side=[("Exports", "MPE MIDI<br>MusicXML")],
   links=[("Repository", "https://github.com/caerjar/newmusic")]),
 
-dict(
-  slug="assay", num="09", title="Assay",
-  sub="A claim-and-evidence compiler",
-  year="2026", medium="software / research instrument",
-  status="Working without a model — 25 tests, ruff and mypy clean",
-  blurb="A machine for finding out where you are wrong, which is why so few exist.",
-  lead="Point it at a corpus of notes and it extracts, for every claim, its supporting evidence, its "
-       "contradicting evidence, its assumptions, its citation chain and a confidence — which lets it "
-       "answer three questions a topic-and-summary catalog cannot.",
-  imgs=[("assets/img/plate-assay.svg", "Claim, evidence, chain — the compiler’s output as a graph.", False)],
-  prose="""<h2>The three questions</h2>
-<ul>
-<li><b>Which claims rest on a single source?</b></li>
-<li><b>Where do these notes contradict each other?</b></li>
-<li><b>Which citation chains are circular?</b></li>
-</ul>
-<p>It is a machine for finding out where you are wrong, which is why so few exist.</p>
-
-<h2>The one design decision that matters</h2>
-<p>Its headline output is <i>“no support was found for this claim.”</i> That is indistinguishable,
-to a reader, from <i>“retrieval was broken.”</i></p>
-<p>So the compiler <b>refuses to report unsupported claims from a degraded run</b> — a stale index,
-unreadable documents, a model that errored. Contradictions, single-source claims and citation cycles
-are still reported, because those are findings rather than absences.</p>
-
-<h2>Status</h2>
-<p>Honest state, 18 August 2026. Working with no model needed: corpus loading, both link forms,
-passage splitting, fingerprinting, TF-IDF retrieval with health, citation-cycle detection, all three
-reports, and the refusal behaviour. <b>25 tests</b>; ruff and mypy clean.</p>""",
-  side=[],
-  links=[("Repository — private", None)]),
 
 dict(
   slug="meridian", num="10", title="Meridian",
@@ -438,29 +415,6 @@ publisher and fails at the last hop — <b>by design, not by accident</b>.</p>""
   side=[],
   links=[("Repository — private", None)]),
 
-dict(
-  slug="compute-club", num="13", title="Compute Club",
-  sub="A cooperative interface for shared compute",
-  year="2026", medium="software / commons / prototype",
-  status="Prototype — real frontend, fully mocked data",
-  blurb="Members run agents, build apps, and contribute back to a commons — earning credits they spend on compute.",
-  lead="A cooperative interface for using language models on shared compute. Members run agents and "
-       "harnesses, build apps, and contribute apps, archive material and reviewed AI knowledge back "
-       "to a commons — earning credits they spend on compute.",
-  imgs=[("assets/img/plate-compute-club.svg", "Credit, commons, compute — the membership as a mesh.", False)],
-  prose="""<h2>The four surfaces</h2>
-<ul>
-<li><b>Dashboard</b> — personal: budgets shown remaining-first, a live active-agents panel with pause and kill and cost, usage charts, storage, projects, contributions and credits.</li>
-<li><b>Commons</b> — community: a searchable registry of apps, archive and AI knowledge, each with provenance; knowledge carries a confidence and a review gate; governance proposals.</li>
-<li><b>Workspace</b> — one multi-pane build environment: chat, harness runner, editor, terminal, logs.</li>
-<li><b>Account &amp; Secrets</b> — SSH keys, secrets vault, profile, credits and billing, privacy defaults.</li>
-</ul>
-
-<h2>Status</h2>
-<p>A real frontend with <b>fully mocked data</b> behind a swappable API layer. There is no real
-backend, but the architecture is shaped so one can drop in.</p>""",
-  side=[],
-  links=[("Repository — private", None)]),
 
 dict(
   slug="dream", num="14", title="Dream",
@@ -482,23 +436,6 @@ show.</p>""",
   side=[("Engine", "Godot 4.5<br>2D silhouette and light<br>Solo build")],
   links=[("Repository — private", None)]),
 
-dict(
-  slug="bardo", num="15", title="Bardo",
-  sub="Combat that resolves through recognition",
-  year="2026", medium="game / Godot 4.5 / prototype",
-  status="Milestone 1 only — one room, one deity, three practices",
-  blurb="A 2D action platformer set in a modified Tibetan Book of the Dead, where combat resolves through recognition rather than damage.",
-  lead="A Hollow-Knight-style 2D action platformer set in a modified Tibetan Book of the Dead, where "
-       "your moveset is a limited loadout of yogic practices seated in chakras, and combat resolves "
-       "through recognition rather than damage.",
-  imgs=[("assets/img/plate-bardo.svg", "Practice, pattern, recognition.", False)],
-  prose="""<h2>What exists</h2>
-<p>Milestone 1 only: one room, one deity, three practices, coloured rectangles. It exists to answer
-one question — is “survive the pattern while holding the correct practice” <i>fun</i>, or merely
-clever?</p>
-<p>Bardo is a working title.</p>""",
-  side=[("Engine", "Godot 4.5<br>Headless smoke tests")],
-  links=[("Repository — private", None)]),
 
 # ---- works with no repository: art, editions, writing, collaborations -------
 dict(
@@ -546,7 +483,7 @@ chain here is a release mechanism and a ledger of what was issued, not the subje
   links=[("Evertunes Studio on OpenSea", "https://opensea.io/evertunes-studio")]),
 
 dict(
-  slug="what-the-tech", title="What the Tech", sub="Trust, authorship and ethics, written into code",
+  slug="what-the-tech", venue="Visions2030 Fellowship", title="What the Tech", sub="Trust, authorship and ethics, written into code",
   year="2026", medium="collaboration / smart contract / video",
   status="First-year Visions2030 collaboration",
   blurb="Verifying origin and intent in an era shaped by forgery and deepfakes.",
@@ -563,7 +500,7 @@ forgery and deepfakes. The contract is not a market instrument here. It is a wit
 says who made a claim, and when, that does not depend on the claimant still being around to
 confirm it.</p>""",
   side=[("With", "Mary Ellen Carroll, conceptual artist"),
-        ("Supported by", "Visions2030 — Ethical Imagination")],
+        ("Fellowship", "Visions2030<br>Ethical Imagination")],
   links=[("Visions2030 on Instagram", "https://www.instagram.com/reel/DTOUu3GExM4/")]),
 
 dict(
@@ -571,28 +508,41 @@ dict(
   year="ongoing", medium="editions / print / publishing",
   status="Active — 501(c)(3) nonprofit",
   blurb="A nonprofit edition house producing artists' prints, photographs, books and environmental projects.",
-  lead="Peat and Repeat is a 501(c)(3) nonprofit art edition house in Ridgewood, Queens. It produces "
-       "artists’ prints and editions, photographs, books, and environmental projects — an "
-       "independent, artist-run enterprise built on collective creative effort.",
+  lead="A fluid collection of artists, poets and performers practicing slow cultural repair "
+       "through decomposition, preservation and reuse — an artist-run 501(c)(3) edition house, "
+       "nomadically located in Queens, New York, producing prints, photographs, artists’ books, "
+       "apparel and ephemera to support artists and artist projects.",
   imgs=[("assets/img/plate-peat-and-repeat.svg", "A core read down through its beds, and the registration marks that hold an edition true.", False)],
-  prose="""<h2>What it publishes</h2>
-<p>The imprint carries <i>BOG</i>, <i>trouble</i> and <i>ephemera</i>, alongside the Woodbine Art
-Auction and an apparel line. The range is deliberate: an edition house that only made prints would
-be a press, and the environmental projects are what keep the printed work tied to a place rather
-than to a market.</p>
+  prose="""<h2>The name, and the premise</h2>
+<p>The name came out of a running joke about life’s repetitions, redundancies, rehashing, recycling
+and reruns. Since 2021 the primary objective has been to support artist projects through the sale of
+prints, editions, original works and ephemera — specifically the work of artists who are most often
+operating without financial safety nets.</p>
+<p>What the artists have in common is a critical embrace of the subversive metaphor: the bird that
+doesn’t sing, squares that are not square, the pretty picture that’s ugly, the waking dream, the
+ghost in the machine.</p>
 
-<h2>Why an edition</h2>
-<p>An edition is a form with a built-in politics. It fixes how many exist, states it publicly, and
-distributes the work at a price a person can actually pay — which is a different proposition from
-the unique object, and a different one again from the infinitely reproducible file.</p>
-<p>The organization takes its bearings from a line of Louise Bourgeois’: “It is not so much where my
-motivation comes from but rather how it manages to survive.”</p>""",
-  side=[("Form", "501(c)(3) nonprofit<br>Ridgewood, Queens, New York"),
+<h2>What it publishes</h2>
+<p>Prints, photographs, artists’ books, apparel and ephemera, plus the Woodbine Art Auction — and
+<i>BOG</i>, the book series the vision is now being furthered through. In 2026 the house is also
+orienting toward artist-initiated <b>in-situ environmental projects</b>: expansive, long-term
+platforms for working with and within communities, near and far.</p>
+
+<h2>The pricing experiment</h2>
+<p>It began with universal pricing — every print the same price. That was a good idea and not a
+sustainable one, so prices rose on some work and edition sizes changed. What survived is the
+commitment to a <b>range of affordability</b>: for some the prices are too high and for others too
+low, which is roughly what an honest answer to the art market looks like.</p>
+<p>“Now more than ever is the time for collective endeavors.” The house takes its bearings from a
+line of Louise Bourgeois’: “It is not so much where my motivation comes from but rather how it
+manages to survive.”</p>""",
+  side=[("Role", "Board<br>Artist Advisory Board"),
+        ("Form", "501(c)(3), artist-run<br>Founded 2021<br>Queens, New York"),
         ("Imprints", "BOG<br>trouble<br>ephemera<br>Woodbine Art Auction<br>apparel")],
   links=[("peatandrepeat.org", "http://peatandrepeat.org/")]),
 
 dict(
-  slug="pgm-diagrams", title="PGM Diagrams", sub="The Greek Magical Papyri, drawn as operations",
+  slug="pgm-diagrams", venue="Sphinx — publication and reading series", title="PGM Diagrams", sub="The Greek Magical Papyri, drawn as operations",
   year="ongoing", medium="diagram / ritual / computation",
   status="Ongoing — one spell fully formalised and building",
   blurb="Reading a spell as a procedure: what it takes in, what it emits, and what it does not account for.",
@@ -609,6 +559,12 @@ where the same object also emits the score, and then used as the frame for
 <a href="../order-of-the-meridian/">Order of the Meridian</a>, where the assistant summoned is a
 machine and the week closes by giving it license to depart.</p>
 
+<h2>Sphinx</h2>
+<p>The diagrams and the readings around them run through <b>Sphinx</b>, a publication and reading
+series — which is where the work is argued in public rather than only drawn. A reading series is the
+right venue for this: a diagram of a rite is a claim about what the rite does, and a claim wants a
+room that can push back on it.</p>
+
 <h2>What the drawing is for</h2>
 <p>Drawing a rite as a diagram makes two things checkable that prose hides: the <b>order</b> of
 operations, and the <b>typing</b> — what each step actually consumes and produces. Once a spell is
@@ -621,7 +577,7 @@ silently would make the diagram say more than the manuscript does.</p>""",
   links=[]),
 
 dict(
-  slug="prayer-coin", title="Prayer Coin", sub="A struck object for a thing that has no price",
+  slug="prayer-coin", venue="Recurse Center Fellowship / Residency", title="Prayer Coin", sub="A struck object for a thing that has no price",
   year="2018", medium="coin / ritual / value",
   status="Editioned object",
   blurb="A coin struck for prayer — the one transaction that was never supposed to have a denomination.",
@@ -635,12 +591,15 @@ opposite arrangement — unaccounted, unwitnessed, and not owed back. Striking o
 the two systems in the same hand and lets the mismatch do the work.</p>
 <p>It belongs to a line of work that holds that <b>everything has a value, though not necessarily a
 price</b> — and to a pair with the <a href="../unpaid-labor-coin/">Unpaid Labor Coin</a>, which
-takes the same form to the other unpriced thing.</p>""",
+takes the same form to the other unpriced thing.</p>
+<p>Made during a fellowship and residency at the <b>Recurse Center</b>, where the surrounding
+question — what a currency is actually for — had a room full of people willing to argue about
+it.</p>""",
   side=[("Pairs with", '<a href="../unpaid-labor-coin/">Unpaid Labor Coin</a>, 2019')],
   links=[]),
 
 dict(
-  slug="unpaid-labor-coin", title="Unpaid Labor Coin", sub="Denominated in the work nobody counted",
+  slug="unpaid-labor-coin", venue="Recurse Center Fellowship / Residency", title="Unpaid Labor Coin", sub="Denominated in the work nobody counted",
   year="2019", medium="coin / labor / value",
   status="Editioned object",
   blurb="A currency for care, maintenance and attention — the work that holds everything up and is never entered in a ledger.",
@@ -652,21 +611,25 @@ dict(
 the tending, the cleaning, the remembering — stays economically invisible while remaining
 absolutely load-bearing. A coin is the bluntest possible instrument for making that visible: it
 forces a denomination onto something that has been kept deliberately undenominated.</p>
-<p>Struck to the same specification as the <a href="../prayer-coin/">Prayer Coin</a>, a year later.
-Together they mark the two directions value runs when it is not money: upward, unaccounted, and
-downward, unpaid.</p>""",
+<p>Struck to the same specification as the <a href="../prayer-coin/">Prayer Coin</a>, a year later,
+and out of the same <b>Recurse Center</b> fellowship and residency. Together they mark the two
+directions value runs when it is not money: upward, unaccounted, and downward, unpaid.</p>""",
   side=[("Pairs with", '<a href="../prayer-coin/">Prayer Coin</a>, 2018')],
   links=[]),
 
 dict(
-  slug="emu-butch", title="Emu Butch", sub="A book",
+  slug="emu-butch", venue="Banff Centre Writers Residency, 2026", title="Emu Butch", sub="A book",
   year="in progress", medium="writing / book",
   status="Manuscript",
   blurb="A book-length work in prose.",
   lead="A book-length work in prose, written and edited in the open — and the reason the manuscript "
        "tooling in this stack exists at all.",
   imgs=[("assets/img/plate-emu-butch.svg", "Seven gatherings and one text block: a book seen from the spine.", False)],
-  prose="""<h2>The book and its workbench</h2>
+  prose="""<h2>Supported by</h2>
+<p>A <b>Banff Centre writers residency</b>, 2026 — which is the part of a book’s life that decides
+whether it gets finished: time, and a room, and other writers in the building.</p>
+
+<h2>The book and its workbench</h2>
 <p><a href="../palimpsest/">Palimpsest</a> was built for this manuscript before it was built for
 anything else: a folder of numbered Markdown sections, a colour-coded reading copy, a parts board, a
 copyedit pass, a back-of-book index and the motifs named by hand. The tool is
@@ -677,54 +640,154 @@ the same pass, and each one keeps the other honest.</p>""",
   links=[]),
 
 dict(
-  slug="mugworts", title="Mugworts Free Herbal Clinic", sub="Care as collective infrastructure",
+  slug="mugworts", venue="DWeb NYC 2023 · DWeb Camp 2024<br>HOPE 2025, 2026<br>Herbal Theurgy — Black Sky, Crete, 2025", title="Mugworts Free Herbal Clinic", sub="Care as collective infrastructure",
   year="ongoing", medium="herbalism / care / collective practice",
   status="Ongoing practice",
   blurb="A free herbal clinic — medicine as something a community makes and keeps, not something it buys.",
-  lead="A free herbal clinic: medicinal plants prepared and given away, and the practice of care "
-       "treated as infrastructure a community holds itself rather than a service it purchases.",
+  lead="Herbal medicine is the people’s medicine and should be accessible to all. The clinic exists "
+       "to give individuals and communities agency over their own bodies and health choices — "
+       "donation-based consultations, workshops, and medicine made in company rather than bought.",
   imgs=[("assets/img/plate-mugworts.svg", "A materia medica sheet: part, preparation, dose, note.", False)],
-  prose="""<h2>Free, and what that requires</h2>
-<p>Free is a structural claim, not a discount. It means the clinic has to be held up by something
-other than payment — by growers, by preparers, by people who show up — and that the knowledge has to
-be written down in a form others can pick up and run.</p>
-<p>Herbal practice is where the rest of this work gets its model of an archive that has to stay
-usable. A materia medica is only worth keeping if the next person can read the part, the
-preparation, the dose and the caution and act on them; the same standard is what
+  prose="""<h2>The clinic</h2>
+<p>A collective of clinical herbalists, each through Arborvitae School of Traditional Herbalism’s
+three-year clinical and mentorship program, working in the Hudson Valley. Consultations are
+donation-based and one-to-one, holistic rather than symptom-led — physical, emotional and spiritual
+— with a herbal plan built inside whatever budget a person actually has. Women’s health, immune
+challenges, digestion, the nervous system, anxiety, depression, PTSD, and the acute things: colds,
+flu. All ages, infants to elders, including pregnancy.</p>
+
+<h2>Walks, workshops, medicine making</h2>
+<p>The practice travels. Herbal walks, workshops and medicine-making sessions have run at
+<b>DWeb NYC</b> (2023), <b>DWeb Camp</b> (2024), <b>HOPE — Hackers on Planet Earth</b> (2025 and
+2026), and as <b>Herbal Theurgy</b> at Black Sky, Crete (2025).</p>
+<p>The venues are not incidental. Taking plant medicine into hacker and decentralized-web
+gatherings puts two literacies in the same room — people who know how to keep a network running and
+people who know how to keep a body running — on the shared premise that both are infrastructure a
+community can hold itself.</p>
+
+<h2>Why it informs the rest</h2>
+<p>Free is a structural claim, not a discount: it means the clinic is held up by growers, preparers
+and people who show up, and that the knowledge has to be written down in a form others can pick up
+and run. A materia medica is only worth keeping if the next person can read the part, the
+preparation, the dose and the caution and act on them — the same standard
 <a href="../sanctuary-cell-division/">Sanctuary Cell Division</a> asks of an organization’s own
 records.</p>""",
-  side=[("Related", '<a href="../sanctuary-cell-division/">Sanctuary Cell Division</a> — archives an organization can actually read')],
-  links=[]),
+  side=[("Where", "Hudson Valley, New York<br>Donation-based, 1:1"),
+        ("Training", "Arborvitae School of Traditional Herbalism<br>three-year clinical program"),
+        ("Related", '<a href="../sanctuary-cell-division/">Sanctuary Cell Division</a> — archives an organization can actually read')],
+  links=[("mugwortsherbalclinic.com", "https://www.mugwortsherbalclinic.com/")]),
+
+
 
 dict(
-  slug="siliconkin", title="Siliconkin", sub="Kinship with the substrate",
-  year="ongoing", medium="diagram / computation / sound",
-  status="Ongoing",
-  blurb="Taking the machine seriously as kin rather than tool — read as a floorplan, and heard.",
-  lead="Work that takes the machine seriously as kin rather than as a tool: the die read as a "
-       "landscape with regions and neighbours, and its activity heard rather than only measured.",
-  imgs=[("assets/img/plate-siliconkin.svg", "A die floorplan and the signal read off it.", False)],
-  prose="""<h2>The move</h2>
-<p>A processor is usually described in the language of instruments — it executes, it serves, it is
-used. Read instead as a floorplan, it becomes a place: blocks with borders, neighbours, traffic
-between them, and a bond of pads at the edge where it meets everything else.</p>
-<p>Making that audible is the second half. The same structure that draws as a floorplan can be read
-out as sound, which is the operation
-<a href="../diagrammatic-immanence/">Diagrammatic Immanence</a> and
-<a href="../sounds-like/">sounds-like</a> both run: one object, two renderings, never a picture and
-a soundtrack that merely resemble each other.</p>""",
-  side=[("Related", '<a href="../diagrammatic-immanence/">Diagrammatic Immanence</a><br>'
-                    '<a href="../sounds-like/">sounds-like</a>')],
-  links=[]),
+  slug="heddatron", title="Heddatron", sub="Hedda Gabler, performed by robots",
+  year="2006", medium="robotics / theatre",
+  venue="HERE Arts Center, New York, 2006<br>Les Frères Corbusier, dir. Alex Timbers",
+  blurb="Five robots played Ibsen's men in an absurdist Hedda Gabler — robotics built by Botmatrix.",
+  lead="Elizabeth Meriwether’s absurdist play drops an unhappy housewife into a cast of self-aware "
+       "robots, updating Ibsen’s <i>Hedda Gabler</i> for its centenary year. The robots were "
+       "designed and built by Botmatrix.",
+  imgs=[("assets/img/plate-heddatron.svg", "A plot of the stage: five robot marks and the cable runs back to control.", False)],
+  prose="""<h2>The cast</h2>
+<p>Five robots took the men and the household: <b>Hans</b> as Eilert Lovborg, <b>Billy</b> as George
+Tesman, <b>Brack-Bot</b> as Judge Brack, and <b>Aunt Julie-Bot</b> and <b>Berta-Bot</b>. Jane Gordon,
+the human at the centre, was played by Carolyn Baeumler. It premiered in 2006 at HERE Arts Center in
+New York, produced by Les Frères Corbusier and directed by Alex Timbers, in the centenary of Ibsen’s
+death.</p>
+
+<h2>Why robots make it work</h2>
+<p>The joke is structural, not decorative. <i>Hedda Gabler</i> is a play about a woman boxed in by
+men who are entirely predictable — and a robot is a machine for being predictable in public. Casting
+the men as machines does not soften the domestic drama; it makes the trap legible, because you can
+see the mechanism.</p>
+<p>Which is also the engineering problem. A robot on stage has to hit its mark on a cue, night after
+night, in a room full of people, with no retake — a constraint closer to live instrument-building
+than to demo work.</p>""",
+  side=[("Robotics", "Botmatrix — Cindy Jeffers and the artist"),
+        ("Production", "Les Frères Corbusier<br>dir. Alex Timbers<br>HERE Arts Center, New York")],
+  links=[("Heddatron on Wikipedia", "https://en.wikipedia.org/wiki/Heddatron"),
+         ("NYT — In Robot World, She Turns More Hedda Than Hedda",
+          "https://www.nytimes.com/2006/02/18/theater/reviews/in-robot-world-she-turns-more-hedda-than-hedda.html"),
+         ("NYT — Do Robots Dream of Electric Lovborgs?",
+          "https://www.nytimes.com/2006/02/05/theater/newsandfeatures/do-robots-dream-of-electric-lovborgs.html")]),
+
+dict(
+  slug="paom", title="PAOM", sub="Print All Over Me",
+  year="2013–", medium="platform / apparel / artist commons",
+  blurb="Custom apparel made to order with zero inventory waste — and a platform that pays the artists whose work it prints.",
+  lead="Print All Over Me makes one-of-a-kind custom printed apparel, made to order with zero "
+       "inventory waste — you can buy exactly one. Co-founded in 2013 as a sibling enterprise "
+       "pairing fashion design with computer science.",
+  imgs=[("assets/img/plate-paom.svg", "The cut and the repeat: panels on the left, the pattern that fills them on the right.", False)],
+  prose="""<h2>The model</h2>
+<p>Conventional apparel guesses demand, manufactures ahead of it, and eats the difference as
+unsold stock. Made-to-order inverts that: nothing exists until someone wants it, which removes the
+inventory risk that is the reason small designers cannot get started at all.</p>
+<p>The consequence is the interesting part. Once producing one garment costs the same per unit as
+producing a thousand, an artist does not need a buyer, a minimum order or a warehouse — they need a
+file. The platform runs on collaborative collections with artists and designers, which is the same
+proposition as an edition house, in cloth.</p>
+
+<h2>Why it belongs here</h2>
+<p>It is the commercial-scale version of the question the coins ask and
+<a href="../peat-and-repeat/">Peat and Repeat</a> asks again: what does it take for an artist’s work
+to reach a person at a price that person can pay, without the artist absorbing all the risk.</p>""",
+  side=[("Founded", "2013<br>Sibling enterprise — fashion design and computer science"),
+        ("Model", "Made to order<br>Zero inventory waste<br>Artist collections")],
+  links=[("paom.com", "https://paom.com/")]),
+
+dict(
+  slug="kokowa", title="Kokowa", sub="Build a virtual world without building an engine",
+  year="2016–2017", medium="webVR / 3D publishing platform",
+  blurb="A browser tool that made building a virtual world as easy as making a page.",
+  lead="A webVR and 3D publication platform: drop in 3D objects, upload images, add notation, and "
+       "assemble a world out of ready-made figures and environments — in a browser, with nothing "
+       "to install.",
+  imgs=[("assets/img/plate-kokowa.svg", "A ground plane, placed objects, and the cone of what a viewer can actually see.", False)],
+  prose="""<h2>The problem it took on</h2>
+<p>In 2016 building anything in VR meant a game engine, a toolchain and a build step — which meant
+the medium belonged to people who already had those skills. Kokowa put world-building in the
+browser and made publishing a world about as hard as publishing a page.</p>
+<p>WIRED covered it in April 2017 under the observation that it made building bizarro virtual
+worlds far easier, which is a fair description of both the tool and the point: lower the floor, and
+what gets made stops looking like a tech demo.</p>
+
+<h2>Afterward</h2>
+<p>The company is no longer active. The problem it named is not solved so much as absorbed — and
+the same instinct, that a medium is only real once ordinary people can publish into it without a
+build step, runs through <a href="../palimpsest/">Palimpsest</a> and
+<a href="../sigil-studio/">Sigil Studio</a>, both of which run entirely in a browser with nothing
+uploaded anywhere.</p>""",
+  side=[("Form", "webVR, in-browser<br>Seed-funded 2016<br>No longer active")],
+  links=[("WIRED — Kokowa makes it dead simple to create super weird virtual worlds",
+          "https://www.wired.com/2017/04/want-kick-putin-virtual-world-kokowa/")]),
+
+dict(
+  slug="thirteen-bit", title="13Bit Productions", sub="Underground film, shorts, and the Labs",
+  year="2004–2010", medium="film / video / moving image",
+  venue="New York",
+  blurb="A New York film production company making features, shorts and underground work.",
+  lead="A New York film production company making feature and short films alongside experimental "
+       "work under the Labs and House of Bit.",
+  imgs=[("assets/img/plate-thirteen-bit.svg", "A strip, and the single frame pulled out of it.", False)],
+  prose="""<h2>The company</h2>
+<p>13Bit Productions was established in New York in 2004, working across features, short films and
+underground production, with experimental strands running under <b>the Labs</b> and
+<b>House of Bit</b> alongside a video-out practice.</p>
+<p>It is the earliest of the moving-image work here, and the point in the sequence where the
+recurring interest starts: not the finished cut but the apparatus around it — what a frame is, what
+it costs to make one, and who gets to.</p>""",
+  side=[("Form", "New York, established 2004<br>Features, shorts, the Labs, House of Bit")],
+  links=[("13bit.com", "https://www.13bit.com/")]),
 
 ]
 
 ORDER = [
     "order-of-the-meridian", "sanctuary-cell-division", "evertunes", "what-the-tech",
-    "peat-and-repeat", "pgm-diagrams", "prayer-coin", "unpaid-labor-coin", "emu-butch",
-    "mugworts", "siliconkin", "diagrammatic-immanence", "palimpsest", "sigil-studio",
-    "divinatory-os", "sounds-like", "newmusic", "assay", "meridian", "research-manager",
-    "cyborg-support", "compute-club", "dream", "bardo",
+    "heddatron", "peat-and-repeat", "pgm-diagrams", "prayer-coin", "unpaid-labor-coin",
+    "emu-butch", "mugworts", "kokowa", "paom", "thirteen-bit",
+    "diagrammatic-immanence", "palimpsest", "sigil-studio", "divinatory-os",
+    "sounds-like", "newmusic", "meridian", "research-manager", "cyborg-support", "dream",
 ]
 P.sort(key=lambda d: ORDER.index(d["slug"]))
 for _i, _d in enumerate(P, 1):
@@ -834,7 +897,6 @@ def build_project(i, pr):
     meta = [f"<b>{pr['year']}</b>", pr["medium"]]
     if pr.get("venue"):
         meta.append(pr["venue"])
-    meta.append(pr["status"])
     meta_html = "<br>".join(meta)
 
     sides = "\n".join(
