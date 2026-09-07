@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Assay — Eon Meridian</title>
+<meta name="description" content="A machine for finding out where you are wrong, which is why so few exist." />
+<link rel="stylesheet" href="../../assets/site.css" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+<div class="site" id="top">
+<header class="mast">
+  <div>
+    <a class="brand" href="../../index.html">EON MERIDIAN</a>
+    <div class="roles">artist · writer · technologist · herbalist</div>
+  </div>
+  <nav class="nav">
+    <a href="../../index.html#work">work</a>
+    <a href="../../index.html#about">about</a>
+  </nav>
+</header>
+<main>
+
+<section class="proj-head">
+  <div>
+    <div class="smallcaps">18 / project</div>
+    <h1>Assay</h1>
+    <div class="smallcaps" style="margin-top:9px">A claim-and-evidence compiler</div>
+  </div>
+  <div class="proj-meta"><b>2026</b><br>software / research instrument<br>Working without a model — 25 tests, ruff and mypy clean</div>
+</section>
+
+<p class="lead">Point it at a corpus of notes and it extracts, for every claim, its supporting evidence, its contradicting evidence, its assumptions, its citation chain and a confidence — which lets it answer three questions a topic-and-summary catalog cannot.</p>
+
+<div class="plates">
+    <figure>
+      <div class="plate"><img src="../../assets/img/plate-assay.svg" alt="Claim, evidence, chain — the compiler’s output as a graph." loading="lazy" /></div>
+      <figcaption class="smallcaps">Claim, evidence, chain — the compiler’s output as a graph.</figcaption>
+    </figure>
+</div>
+
+<div class="proj-body">
+  <div class="prose">
+<h2>The three questions</h2>
+<ul>
+<li><b>Which claims rest on a single source?</b></li>
+<li><b>Where do these notes contradict each other?</b></li>
+<li><b>Which citation chains are circular?</b></li>
+</ul>
+<p>It is a machine for finding out where you are wrong, which is why so few exist.</p>
+
+<h2>The one design decision that matters</h2>
+<p>Its headline output is <i>“no support was found for this claim.”</i> That is indistinguishable,
+to a reader, from <i>“retrieval was broken.”</i></p>
+<p>So the compiler <b>refuses to report unsupported claims from a degraded run</b> — a stale index,
+unreadable documents, a model that errored. Contradictions, single-source claims and citation cycles
+are still reported, because those are findings rather than absences.</p>
+
+<h2>Status</h2>
+<p>Honest state, 18 August 2026. Working with no model needed: corpus loading, both link forms,
+passage splitting, fingerprinting, TF-IDF retrieval with health, citation-cycle detection, all three
+reports, and the refusal behaviour. <b>25 tests</b>; ruff and mypy clean.</p>
+  </div>
+  <div>
+    <div class="side"><span class="smallcaps">index</span><br><a href="../../index.html#work">All work →</a></div>
+  </div>
+</div>
+
+<div class="links">
+    <span class="off">Repository — private</span>
+  <a href="../../index.html#work">All work</a>
+</div>
+
+<nav class="prevnext">
+  <span><a href="../newmusic/">← newmusic</a></span>
+  <span><a href="../meridian/">Meridian →</a></span>
+</nav>
+
+</main>
+<footer class="footer">
+  <span>Eon Meridian</span>
+  <span>ongoing index / version 01</span>
+</footer>
+</div>
+</body>
+</html>

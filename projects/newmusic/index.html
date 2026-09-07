@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>newmusic — Eon Meridian</title>
+<meta name="description" content="Most recommenders return more of what your ear already recognises. This one runs the model backwards." />
+<link rel="stylesheet" href="../../assets/site.css" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+</head>
+<body>
+<div class="site" id="top">
+<header class="mast">
+  <div>
+    <a class="brand" href="../../index.html">EON MERIDIAN</a>
+    <div class="roles">artist · writer · technologist · herbalist</div>
+  </div>
+  <nav class="nav">
+    <a href="../../index.html#work">work</a>
+    <a href="../../index.html#about">about</a>
+  </nav>
+</header>
+<main>
+
+<section class="proj-head">
+  <div>
+    <div class="smallcaps">17 / project</div>
+    <h1>newmusic</h1>
+    <div class="smallcaps" style="margin-top:9px">An instrument whose controls are aesthetic markers</div>
+  </div>
+  <div class="proj-meta"><b>2026</b><br>instrument / score / model<br>Working — 86 tests, eight controls, full export</div>
+</section>
+
+<p class="lead">An instrument whose eight controls are aesthetic markers rather than parameters. Most recommenders converge: they model your ear and return more of what it already recognises. This builds the model precisely and then runs it backwards — to find and play the combinations your ear has never had to hold.</p>
+
+<div class="plates">
+    <figure>
+      <div class="plate"><img src="../../assets/img/plate-newmusic.svg" alt="Marker, space, blind spot — the eight-control space read as contour." loading="lazy" /></div>
+      <figcaption class="smallcaps">Marker, space, blind spot — the eight-control space read as contour.</figcaption>
+    </figure>
+</div>
+
+<div class="proj-body">
+  <div class="prose">
+<h2>How it runs</h2>
+<p>You set eight controls, which give a target marker vector; a local model proposes a score
+specification; the specification is realized as events, measured against the markers, and
+adjudicated in a loop until it lands where you pointed.</p>
+
+<h2>Status</h2>
+<p>Honest state, 23 August 2026. <b>Working:</b> the event model, all seven analyzers, the eleven
+anchor fixtures, the 128-cell space and its blind-spot finder, spec realization, the adjudicator
+loop, MPE MIDI and MusicXML export, and the interface — <b>86 tests</b>, two of which need a local
+model.</p>
+
+<h2>What builds on it</h2>
+<p><a href="../sounds-like/">sounds-like</a> pins this repository as a git dependency and supplies
+the sound it deliberately lacks.</p>
+  </div>
+  <div>
+    <div class="side"><span class="smallcaps">Exports</span><br>MPE MIDI<br>MusicXML</div>
+  </div>
+</div>
+
+<div class="links">
+    <a href="https://github.com/caerjar/newmusic" target=_blank rel=noopener>Repository ↗</a>
+  <a href="../../index.html#work">All work</a>
+</div>
+
+<nav class="prevnext">
+  <span><a href="../sounds-like/">← sounds-like</a></span>
+  <span><a href="../assay/">Assay →</a></span>
+</nav>
+
+</main>
+<footer class="footer">
+  <span>Eon Meridian</span>
+  <span>ongoing index / version 01</span>
+</footer>
+</div>
+</body>
+</html>
