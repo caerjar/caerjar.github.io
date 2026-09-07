@@ -350,15 +350,15 @@ dict(
   sub="A personal knowledge OS",
   year="2026", medium="software / vault / infrastructure",
   status="Technical preview — runs locally via Docker",
-  blurb="Self-hosted, multi-format, AI-native vault for notes, PDFs, ebooks, audio and video.",
+  blurb="A self-hosted, multi-format vault for notes, PDFs, ebooks, audio and video, all searchable.",
   lead="A self-hosted knowledge management system: a multi-format vault for notes, PDFs, EPUBs, "
        "audio and video, all searchable and cataloged, running entirely on your own machine.",
   imgs=[("assets/img/plate-meridian.svg", "Note, mount, vault — three mounts read as beds.", False)],
   prose="""<h2>What it combines</h2>
 <ul>
 <li><b>Multi-format vault</b> — Markdown notes, PDFs, EPUBs, audio, video — all searchable and cataloged</li>
-<li><b>Three-mount architecture</b> — separate working notes, read-only archive, and AI-generated output</li>
-<li><b>Claude integration</b> — search, summarization, chat, and specialized skills</li>
+<li><b>Three-mount architecture</b> — separate working notes, read-only archive, and generated output</li>
+<li><b>Assisted retrieval</b> — search, summarization, chat, and specialized skills over the whole vault</li>
 <li><b>Meridian Commons</b> — your vault gets an agent that can compare notes with another person’s vault over a shared Mattermost server, bounded by a turn budget, scoped to the paths you share, and gated on your approval</li>
 </ul>
 <p>It runs entirely on your machine via Docker. Your data never leaves your computer.</p>
@@ -383,7 +383,7 @@ dict(
   prose="""<h2>The surfaces</h2>
 <ul>
 <li><b>Today</b> — a front door: the vault’s vital signs, what is worth a look, what is waiting, what you touched lately and what has waited longest.</li>
-<li><b>Ask</b> — chat about your vault, against a local model or Anthropic. Every answer cites the vault.</li>
+<li><b>Ask</b> — chat about your vault, against a local model or a hosted one. Every answer cites the vault.</li>
 </ul>
 
 <h2>The shape</h2>

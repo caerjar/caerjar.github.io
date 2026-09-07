@@ -90,17 +90,16 @@ until the next `build.py` run overwrites it — put the change in the table inst
 
 ## Preview locally
 
-Just open the file:
-
 ```bash
-open index.html
+bash tools/serve.sh          # opens http://localhost:8000
+bash tools/serve.sh 9001     # a different port
 ```
 
-Or serve it (handy when you start adding subpages):
+Opening `index.html` with `file://` will **not** work — the `projects/<slug>/` links need a server
+to resolve to their `index.html`. Always preview through `serve.sh`. Nothing about previewing
+touches the live site; publishing is a separate `git commit && git push`.
 
-```bash
-python3 -m http.server 8000   # then visit http://localhost:8000
-```
+After editing `tools/build.py`, run `python3 tools/build.py` and reload the page.
 
 ## Publish on GitHub Pages
 
@@ -125,3 +124,22 @@ write-ups, and demos can all live here.
 ## Credit
 
 Portfolio layout adapted from an editorial mockup; the Caerjar page from a blue-blueprint mockup. Language and goals are Eon's and Caerjar's.
+
+## House rules
+
+Two constraints this site is held to. Check both before publishing.
+
+1. **No real name.** The site is published as Eon Meridian only. Sources that name the artist
+   otherwise (the Heddatron robot credits, the Visions2030 reel, PAOM's founding) are cited by
+   organization — Botmatrix, Visions2030, "a sibling enterprise" — never by personal name.
+2. **No mention of AI.** No vendor names, no "AI", no "artificial intelligence" or "machine
+   learning" anywhere in the published pages.
+
+```bash
+# should print nothing
+grep -rniE "meredith|finkelstein|\bA\.?I\.?\b|claude|anthropic|openai|artificial intelligence|machine learning" \
+  --include="*.html" --include="*.css" --include="*.md" .
+```
+
+Note that `git log` messages are exempt by decision, not by oversight — the commit trailers were
+left as they are.
