@@ -1,4 +1,4 @@
-/* Eon Meridian — shared styles for the index and every project page. */
+/* Eon Meridian: shared styles for the index and every project page. */
 
 :root{
   --paper:#f3f0e8; --ink:#171715; --muted:#6d6a62; --line:#c9c4b8; --soft:#e8e3d8;
@@ -15,7 +15,7 @@ img,svg{max-width:100%}
 
 .site{max-width:var(--max);margin:0 auto;padding:26px 32px 56px}
 
-/* small uppercase label — eyebrows, notes, captions, meta */
+/* small uppercase label: eyebrows, notes, captions, meta */
 .smallcaps{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
 
 /* ---- masthead ---- */

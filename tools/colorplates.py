@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Color plates for the works that have no photographic documentation.
 
-Same register as tools/plates.py — technical drawing on the site's paper ground — but
+Same register as tools/plates.py: technical drawing on the site's paper ground, but
 each work gets one or two spot colors drawn from its own subject. Deterministic: the
 geometry is seeded from the slug, so a plate does not drift between runs.
 
@@ -245,6 +245,55 @@ def plate(slug, label, corner, kind, spot, spot2=None):
         p.append(f'<text x="400" y="522" text-anchor="middle" font-family="Courier New, monospace" '
                  f'font-size="10" fill="{DIM}">VIEWER</text>')
 
+
+    elif kind == "halftone":
+        # a tonal field built out of glyph density: light cells sparse, dark cells packed
+        cols, rows, cw = 16, 11, 34
+        x0, y0 = 128, 118
+        for gy in range(rows):
+            for gx in range(cols):
+                # a soft diagonal gradient with a lit corner, so it reads as an image
+                t_ = (gx / cols) * .55 + (1 - gy / rows) * .45
+                t_ = max(0.0, min(1.0, t_ + n(-.09, .09)))
+                cx, cy = x0 + gx * cw, y0 + gy * cw
+                k = int(round(t_ * 4))
+                if k == 0:
+                    continue
+                for j in range(k):
+                    for i in range(k):
+                        p.append(f'<circle cx="{cx + (i+.5)*cw/k:.1f}" cy="{cy + (j+.5)*cw/k:.1f}" '
+                                 f'r="{1.0 + 1.9*t_:.2f}" fill="{spot}" '
+                                 f'fill-opacity="{.25 + .5*t_:.2f}"/>')
+        p.append(f'<rect x="{x0}" y="{y0}" width="{cols*cw}" height="{rows*cw}" fill="none" '
+                 f'stroke="{LINE}"/>')
+        nodes = []
+        p.append(f'<text x="{x0}" y="{y0+rows*cw+22}" font-family="Courier New, monospace" '
+                 f'font-size="10" fill="{DIM}">ONE GLYPH PER CELL · DENSITY = TONE</text>')
+
+    elif kind == "silhouette":
+        # a side elevation: platforms in shadow, one light source, a small figure
+        p.append(f'<circle cx="612" cy="150" r="34" fill="{spot2}" fill-opacity=".22" '
+                 f'stroke="{spot2}" stroke-width="1"/>')
+        for k in range(24):                       # rays
+            a = 2 * math.pi * k / 24
+            p.append(f'<line x1="{612+38*math.cos(a):.1f}" y1="{150+38*math.sin(a):.1f}" '
+                     f'x2="{612+(58+18*(k%3))*math.cos(a):.1f}" '
+                     f'y2="{150+(58+18*(k%3))*math.sin(a):.1f}" '
+                     f'stroke="{spot2}" stroke-width="1" stroke-opacity=".45"/>')
+        ledges = [(120, 430, 200), (250, 372, 140), (392, 402, 120), (150, 316, 96),
+                  (470, 340, 150), (300, 268, 110)]
+        for x, y, w in ledges:
+            p.append(f'<rect x="{x}" y="{y}" width="{w}" height="11" fill="{spot}" '
+                     f'fill-opacity=".82"/>')
+        for x, w, h in ((110, 92, 120), (236, 74, 96), (348, 110, 150), (500, 84, 108),
+                        (612, 96, 132)):
+            p.append(f'<path d="M{x} 496 L{x} {496-h} Q{x+w/2} {496-h-26} {x+w} {496-h} '
+                     f'L{x+w} 496 Z" fill="{INK}" fill-opacity=".78"/>')
+        p.append(f'<rect x="333" y="242" width="9" height="20" fill="{INK}"/>')
+        p.append(f'<circle cx="337.5" cy="234" r="5" fill="{INK}"/>')
+        nodes = []
+        p.append(f'<text x="120" y="524" font-family="Courier New, monospace" font-size="10" '
+                 f'fill="{DIM}">YOU WIN WHEN YOU REALISE IT</text>')
     elif kind == "garment":        # a cut layout and the repeat that fills it
         panels = [(150, 150, 120, 190), (286, 150, 96, 130), (286, 296, 96, 44),
                   (150, 356, 120, 92), (398, 150, 74, 190)]
@@ -265,7 +314,7 @@ def plate(slug, label, corner, kind, spot, spot2=None):
         p.append(f'<text x="590" y="368" text-anchor="middle" font-family="Courier New, monospace" '
                  f'font-size="10" fill="{DIM}">REPEAT · PRINTED TO ORDER</text>')
 
-    else:  # "die" — a chip floorplan with a signal read off it
+    else:  # "die": a chip floorplan with a signal read off it
         p.append(f'<rect x="150" y="110" width="330" height="290" fill="none" stroke="{INK}"/>')
         blocks = [(168, 128, 120, 84), (300, 128, 162, 52), (300, 192, 78, 96),
                   (390, 192, 72, 62), (168, 224, 120, 62), (168, 298, 294, 88), (390, 266, 72, 20)]
@@ -303,6 +352,8 @@ PLATES = [
     ("thirteen-bit",      "FRAME / CUT / RELEASE",          "STRIP 01",    "strip",    "#2f6b6b", "#a8791f"),
     ("kokowa",            "GROUND / OBJECT / VIEWER",       "WORLD 01",    "world",    "#4a4a8a", "#a3437a"),
     ("paom",              "PANEL / REPEAT / ORDER",         "GARMENT 01",  "garment",  "#a3437a", "#2f5d7a"),
+    ("sigil-studio",      "IMAGE / GLYPH / TONE",           "HALFTONE 01", "halftone", "#4a4a46"),
+    ("dream",             "PLATFORM / LIGHT / FIGURE",      "DREAM 01",    "silhouette","#1d5c66", "#c8912f"),
 ]
 
 if __name__ == "__main__":

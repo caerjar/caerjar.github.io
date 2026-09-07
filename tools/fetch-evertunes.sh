@@ -31,4 +31,4 @@ fetch colonial-hunger ec86079e94e8204f67b28f00803c84/53ec86079e94e8204f67b28f008
 fetch myth-four       c3d61d58b7b84e7c17f82c9fef210a/d7c3d61d58b7b84e7c17f82c9fef210a.png
 fetch jamestown       5f9b171d1de8a4145610be6da35907/015f9b171d1de8a4145610be6da35907.png
 fetch one-acre        395a6c9246b14118cf9440c6233c86/ee395a6c9246b14118cf9440c6233c86.jpeg
-echo "done — now run: python3 tools/build.py"
+echo "done: now run: python3 tools/build.py"

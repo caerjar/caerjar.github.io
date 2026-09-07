@@ -83,14 +83,13 @@ def plate(slug, label, corner, kind):
         for band in range(5):
             y0 = 120 + band * 86
             amp, per, per2, ph = n(18, 34), n(52, 96), n(17, 31), n(0, 6.3)
-            pts = " ".join(
-                f"{x},{y0 - amp*math.sin(x/per + ph) - amp*.34*math.sin(x/per2 + ph*2):.1f}"
+            pts = " ".join(f"{x},{y0 - amp*math.sin(x/per + ph) - amp*.34*math.sin(x/per2 + ph*2):.1f}"
                 for x in range(90, 716, 6))
             p.append(f'<polyline points="{pts}"/>')
             p.append(f'<line x1="90" y1="{y0+34:.0f}" x2="715" y2="{y0+34:.0f}" stroke-dasharray="2 7"/>')
             nodes.append((n(150, 660), y0, 3))
 
-    else:                          # "mesh" — peer nodes and links
+    else:                          # "mesh": peer nodes and links
         pts, nodes = [], []
         for i in range(9):
             a = 2 * math.pi * i / 9 + next(r) * .3
@@ -104,8 +103,7 @@ def plate(slug, label, corner, kind):
         p.append(f'<circle cx="400" cy="300" r="{n(240,262):.0f}" stroke-dasharray="4 8"/>')
 
     p.append("</g>")
-    p.append(f'<g fill="{INK}">' + "".join(
-        f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rr}"/>' for x, y, rr in nodes) + "</g>")
+    p.append(f'<g fill="{INK}">' + "".join(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{rr}"/>' for x, y, rr in nodes) + "</g>")
     p.append(f'<g font-family="Courier New, monospace" font-size="11" fill="{DIM}">'
              f'<text x="80" y="70">{label}</text>'
              f'<text x="{W-80}" y="{H-40}" text-anchor="end">{corner}</text></g>')
