@@ -306,11 +306,15 @@ function pitchLine(pitch) {
     ? ` &nbsp; ${pitch.ratio} &nbsp; ${pitch.cents.toFixed(0)}¢ ` +
       `<span class="drift">${drift}¢ from a piano</span>`
     : ` &nbsp; ${pitch.ratio.replace(/\s*×2\^[-+]?\d+/, '')}`;
+  // Published: the citation still speaks, the authored line does not. What marks an
+  // authored pitch is then the **absence** of a source under it rather than a sentence
+  // saying so — a quieter encoding of the same fact, and the census keeps the tally
+  // (`n cited · n authored · n unpitched`) so the split is still stated somewhere.
   const gloss =
     pitch.provenance === 'cited'
       ? `<span class="cited">${pitch.title}${pitch.locus ? `, ${pitch.locus}` : ''}</span> licenses this pitch`
-      : `this pitch is mine, not the tradition’s`;
-  return `${head}<br><span class="gloss">${gloss}</span>`;
+      : DIAGNOSTIC ? `this pitch is mine, not the tradition’s` : '';
+  return gloss ? `${head}<br><span class="gloss">${gloss}</span>` : head;
 }
 
 /// The selected piece: what it is, what it will play, and whose silence it is if it

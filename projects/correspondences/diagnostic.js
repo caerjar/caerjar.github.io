@@ -18,13 +18,19 @@
 // - the cents, the octave exponent, and the drift from equal temperament — *"the drift
 //   is the tuning, and a fifth that reads +2¢ is audibly not a piano's"*
 // - the score caption, and the piece panel's note on whose the rate is
+// - `this pitch is mine, not the tradition's`, the line under an **authored** pitch
 // - the Strudel pane and its `P` key, which exist so a piece can leave the page
 //
 // What they share is that they answer questions you only have once you are working. To
 // someone meeting the atlas for the first time they read as instrument panel rather than
 // as music.
 //
-// **The ratio itself is never hidden.** It is the cited part — the thing a source
-// licenses — and hiding it would leave a pitch with no stated warrant, which is the one
-// thing this apparatus exists to refuse.
+// **A citation is never hidden.** `Agrippa, p. 262 licenses this pitch` publishes as it
+// stands, and so does the ratio it warrants — hiding either would leave a pitch with no
+// stated warrant, which is the one thing this apparatus exists to refuse.
+//
+// The authored line is the exception, and it is one because it asserts no source. With it
+// gone, what marks an authored pitch is the **absence** of a citation under it rather
+// than a sentence saying so, and the census keeps the tally — `n cited · n authored ·
+// n unpitched` — so the split is still stated on the page.
 export const DIAGNOSTIC = !document.documentElement.hasAttribute('data-published');
