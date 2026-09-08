@@ -313,7 +313,7 @@ const piecePass = stage.add(new PiecePass(surface));
 // Glyphs, and names inside empty frames. After the shapes, so text sits over them.
 const atlas = new TextAtlas(stage.gl);
 stage.add(new TextPass(surface, atlas, letterGlyphs(corpus)));
-sequencer.onStep = (piece) => piecePass.flare(piece);
+// `onStep` is assigned once, below, where the lucidity it also drives is defined.
 
 // The spin, and the sound it makes.
 //
@@ -336,10 +336,62 @@ setInterval(() => {
   sequencer.tick(dt);
 }, 16);
 stage.setPost(new Post());
-// The murk in machinic-hymns is the week's arc, and there is no week here. Kept high
-// enough that the picture reads: an atlas whose lines you have to squint at would fail
-// §Interface rule 2 from the other direction, by making a cited edge look uncertain.
-stage.lucidity = 0.82;
+
+/// The room wakes as it is played.
+///
+/// The murk in machinic-hymns is the week's arc, and there is no week here — so this sat
+/// at a constant 0.82 and the whole post chain, which scales every one of its terms by
+/// `murk = 1 - lucidity`, was tuned and then frozen. Grain, aberration, vignette, wobble
+/// and smear were all being computed every frame at a value that never moved.
+///
+/// It now follows **how much is sounding**: the count of voices the sequencer is
+/// articulating and drones it is holding. An atlas nobody has placed anything on is at
+/// rest and looks it; one playing six shapes has settled and sharpened.
+///
+/// **This is not a ranking and cannot become one.** It counts voices, and a voice is a
+/// voice whatever licenses it — `established` and `speculative` move this number by
+/// exactly one each. Nothing here reads a label, a provenance or a citation. What would
+/// violate §Interface rule 2 is a picture that sharpened for better-supported claims;
+/// this one sharpens for a busier instrument, which is a fact about the performance.
+///
+/// FLOOR is the other half of that rule, from the other direction: the original comment
+/// warned that *"an atlas whose lines you have to squint at"* makes a cited edge look
+/// uncertain. So the murk never returns far enough to obscure an edge — the range is
+/// felt, not squinted through. At rest it is very near where the constant was.
+const LUCID_FLOOR = 0.78;
+const LUCID_CEIL = 0.97;
+const LUCID_FULL = 5;      // shapes at which the room is fully awake
+
+stage.lucidity = LUCID_FLOOR;
+let shimmer = 0;           // decays; each articulated step tops it back up
+
+sequencer.onStep = (piece) => {
+  piecePass.flare(piece);
+  shimmer = Math.min(1, shimmer + 0.25);
+};
+
+stage.onFrame = (dt) => {
+  // **Counted as a state, not as a rate.** Counting steps was the obvious way and it is
+  // wrong: a figure articulates its marks in bursts, so a single hexagram pinned the
+  // room fully awake within a second and every shape after it was invisible. What the
+  // optics should follow is how much is *playing*, which is a property of the surface,
+  // and a shape holding one drone is as much a voice as a shape spelling eight marks.
+  let voices = 0;
+  for (const p of surface.pieces) {
+    if (p.muted) continue;
+    if (p.playable || tuning.pitch(p.node)) voices++;
+  }
+  // The steps are still worth something — they are the only thing that distinguishes a
+  // shape articulating from a shape holding — but as a shimmer on top, worth one voice
+  // at most, rather than as the whole signal.
+  shimmer = Math.max(0, shimmer - dt * 0.9);
+  const want = LUCID_FLOOR + (LUCID_CEIL - LUCID_FLOOR) *
+    Math.min(1, (voices + shimmer) / LUCID_FULL);
+  // Slew, never jump. The optics are a room waking up, and a room that snapped between
+  // two states every time a note landed would read as a flicker, not as breath.
+  stage.lucidity += (want - stage.lucidity) * Math.min(1, dt * 1.4);
+};
+
 stage.start();
 
 // The whole graph, placed once. This is the world the neighbourhood sits inside, and

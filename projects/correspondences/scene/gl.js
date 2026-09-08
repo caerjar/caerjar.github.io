@@ -125,7 +125,15 @@ export class Stage {
     // Frame-time median over a short window. A mean lets one stall from a
     // garbage collection drop the whole room a tier.
     this._frames = [];
-    this._lastDowngrade = 0;
+    this._lastChange = 0;
+    // How many tiers this has ever given up. An installation that recovers has to
+    // remember that it once could not cope, or it spends the evening oscillating.
+    this._sank = 0;
+
+    /// Called once per frame before the passes draw, with the delta in seconds.
+    /// The scene's own state — where the camera is, how awake the room is — belongs to
+    /// whoever assembled the scene, not in here.
+    this.onFrame = null;
 
     this._onResize = () => this.resize();
     addEventListener('resize', this._onResize);
@@ -185,9 +193,35 @@ export class Stage {
     // 20 ms ≈ 50 fps. Below that the drift stops reading as drift.
     const order = ['high', 'mid', 'low'];
     const i = order.indexOf(this.tierName);
-    if (median > 0.020 && i < order.length - 1 && this.time - this._lastDowngrade > 3) {
+    if (this.time - this._lastChange < 3) return;
+
+    if (median > 0.020 && i < order.length - 1) {
+      this._sank++;
       this.setTier(order[i + 1]);
-      this._lastDowngrade = this.time;
+      this._lastChange = this.time;
+      console.info(`[stage] ${(median * 1000).toFixed(1)}ms median → tier ${this.tierName}`);
+      return;
+    }
+
+    // Climb back. This only ever fell before, which is wrong for the thing it was
+    // written for: an installation runs for days, and a single garbage collection in
+    // the first minute would otherwise leave a Pi 5 rendering at half resolution until
+    // somebody power-cycled it. The cost of never recovering is much larger than the
+    // cost of one wrong guess upward, because the wrong guess corrects itself in three
+    // seconds and the ratchet does not.
+    //
+    // Not symmetric with the fall, on purpose:
+    //
+    //   - **12 ms, not 20.** Recovering at the threshold it sank at guarantees an
+    //     oscillation, because the tier above is by definition more expensive than the
+    //     one measuring comfortable now. The gap is the hysteresis.
+    //   - **Each recovery is slower than the last.** A room that cannot hold `high`
+    //     will find that out again, and `_sank` makes it wait longer every time rather
+    //     than retry forever on the same cadence.
+    const patience = 8 * Math.pow(3, Math.max(0, this._sank - 1));
+    if (median < 0.012 && i > 0 && this.time - this._lastChange > patience) {
+      this.setTier(order[i - 1]);
+      this._lastChange = this.time;
       console.info(`[stage] ${(median * 1000).toFixed(1)}ms median → tier ${this.tierName}`);
     }
   }
@@ -207,6 +241,7 @@ export class Stage {
       last = now;
       this.time += dt;
       this._measure(dt);
+      if (this.onFrame) this.onFrame(dt);
       this._render(dt);
       this._raf = requestAnimationFrame(frame);
     };
