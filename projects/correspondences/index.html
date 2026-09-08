@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>monochord</title>
+<link rel="stylesheet" href="monochord.css">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--field); }
+  #scene { position: fixed; inset: 0; display: block; }
+
+  .panel {
+    position: fixed; z-index: 2; color: var(--ink);
+    font: 0.72rem/1.5 var(--mono); letter-spacing: 0.08em;
+  }
+  #where { top: 22px; left: 24px; max-width: 34ch; }
+  #where .label { font: italic 1.35rem/1.25 var(--serif); letter-spacing: 0; display: block; }
+  #where .addr { color: var(--meridian); }
+  #where .gloss { color: var(--dim); letter-spacing: 0; font-family: var(--serif); font-style: italic; }
+
+  #piece {
+    bottom: 64px; right: 24px; text-align: right; max-width: 34ch;
+  }
+  #piece .head { font: italic 1.05rem var(--serif); letter-spacing: 0; }
+  #piece .addr { color: var(--meridian); }
+  #piece .gloss { color: var(--dim); font-family: var(--serif); font-style: italic; letter-spacing: 0; }
+  #piece button {
+    background: transparent; border: 1px solid rgba(244,244,242,0.18); border-radius: 3px;
+    color: var(--ink); font: 0.68rem var(--mono); padding: 1px 6px; cursor: pointer;
+  }
+  #piece button:hover { border-color: var(--meridian); color: var(--meridian); }
+  #where .drift { color: var(--dim); }
+  #where .cited { color: var(--meridian); font-style: normal; }
+
+  #fault {
+    top: 0; left: 0; right: 0; z-index: 9; padding: 10px 24px;
+    background: rgba(226,86,77,0.14); border-bottom: 1px solid var(--mark);
+    color: var(--ink); white-space: pre-wrap;
+  }
+  #fault b { color: var(--mark); font-weight: normal; }
+
+  #scoreview {
+    /* `left: 0; right: 0` does not stretch a canvas: it is a replaced element and keeps
+       an intrinsic width, so the score drew into the left third of the screen and looked
+       clipped. An explicit width is required. */
+    position: fixed; z-index: 5; left: 0; bottom: 0; width: 100vw; height: 46vh;
+    border-top: 1px solid rgba(244,244,242,0.14);
+  }
+
+
+  #keys {
+    bottom: 20px; left: 50%; transform: translateX(-50%);
+    color: var(--dim); letter-spacing: 0.16em;
+  }
+  #keys.muted { color: var(--mark); }
+
+  #graph { bottom: 20px; left: 24px; color: var(--dim); }
+  #graph b { color: var(--ink); font-weight: normal; }
+
+  #tuning { bottom: 20px; right: 24px; text-align: right; color: var(--dim); }
+  #tuning .cited { color: var(--meridian); }
+  #tuning .authored { color: var(--mark); }
+
+  #find { top: 22px; right: 24px; width: 22ch; }
+  #find input {
+    width: 100%; background: transparent; color: var(--ink);
+    border: 1px solid rgba(244,244,242,0.18); border-radius: 3px;
+    padding: 6px 8px; font: 0.72rem var(--mono); letter-spacing: 0.08em;
+  }
+  #find input:focus { outline: none; border-color: var(--meridian); }
+  #hits { margin-top: 6px; max-height: 46vh; overflow-y: auto; }
+  #hits button {
+    display: block; width: 100%; text-align: left; background: transparent;
+    border: 0; color: var(--ink); padding: 4px 0; cursor: pointer;
+    font: 0.72rem var(--mono); letter-spacing: 0.06em;
+  }
+  #hits button:hover { color: var(--meridian); }
+  #hits .a { color: var(--dim); }
+
+  #neighbours { position: fixed; z-index: 2; top: 40%; left: 24px; max-width: 30ch; }
+  #neighbours button {
+    display: block; background: transparent; border: 0; cursor: pointer;
+    color: var(--ink); padding: 3px 0; text-align: left;
+    font: 0.72rem var(--mono); letter-spacing: 0.06em;
+  }
+  #neighbours button:hover { color: var(--meridian); }
+  #neighbours .rel { color: var(--dim); }
+  #neighbours .contested { color: var(--mark); }
+
+  #hint {
+    position: fixed; z-index: 3; inset: 0; display: grid; place-items: center;
+    background: rgba(7,7,11,0.82); cursor: pointer;
+  }
+  #hint p { font: italic 1.3rem var(--serif); color: var(--ink); max-width: 30ch; text-align: center; }
+  #hint small { display: block; margin-top: 1.2rem; font: 0.72rem var(--mono); color: var(--dim); letter-spacing: 0.16em; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div id="where" class="panel"></div>
+<div id="neighbours" class="panel"></div>
+<div id="find" class="panel">
+  <input id="q" placeholder="a name, or an address" autocomplete="off" spellcheck="false">
+  <div id="hits"></div>
+</div>
+<div id="graph" class="panel"></div>
+<div id="tuning" class="panel"></div>
+<div id="fault" class="panel" hidden></div>
+<canvas id="scoreview" hidden></canvas>
+<div id="keys" class="panel">M mute · S score</div>
+<div id="piece" class="panel"></div>
+
+<div id="hint"><p>The atlas, as an instrument.<small>click to begin — audio needs a gesture</small></p></div>
+
+<script type="module">
+import init, { Corpus } from './pkg/monochord_wasm.js';
+import { Stage } from './scene/gl.js';
+import { Motes } from './scene/motes.js';
+import { Field } from './field.js';
+import { Post } from './scene/post.js';
+import { GraphPass } from './graph.js';
+import { index, place, centroid, rings } from './layout.js';
+import { Rings } from './rings.js';
+import { Tuning } from './tuning.js';
+import { Instrument } from './audio.js';
+import { Surface, RATES } from './pieces.js';
+import { PiecePass } from './piecepass.js';
+import { Sequencer } from './sequencer.js';
+import { TextAtlas, letterGlyphs } from './text.js';
+import { TextPass } from './textpass.js';
+import { ScoreView } from './score.js';
+
+const el = (id) => document.getElementById(id);
+
+/// A failure that shows itself.
+///
+/// This exists because of a bug that took a working instrument down to nothing and left no
+/// trace on screen: a renamed property made `standAt` throw halfway through, so the shape
+/// was placed, the pitch line was written, and then the neighbours list and the sound never
+/// happened. An exception in an event handler goes to a console nobody is reading, and the
+/// surface simply went quiet — which is indistinguishable from a quiet piece.
+///
+/// `diagrammatic-immanence` states the rule this broke: *skipping loudly beats guessing
+/// quietly.* So anything that throws says so, here, in the room.
+function fault(where, err) {
+  const box = el('fault');
+  box.hidden = false;
+  box.innerHTML = `<b>${where} failed.</b> ${String(err && err.message ? err.message : err)}`;
+  console.error(where, err);
+}
+
+/// Wrap a handler so a throw inside it is seen rather than swallowed.
+const guard = (where, fn) => (...args) => {
+  try {
+    return fn(...args);
+  } catch (err) {
+    fault(where, err);
+    return undefined;
+  }
+};
+
+addEventListener('error', (ev) => fault('the page', ev.error ?? ev.message));
+addEventListener('unhandledrejection', (ev) => fault('a promise', ev.reason));
+
+await init();
+const corpus = new Corpus();
+const version = JSON.parse(corpus.version());
+const census = JSON.parse(corpus.census());
+const idx = index(census);
+
+// Which (system, kind) pairs have a source recorded as printing no figure. The atlas
+// draws those as rings rather than discs -- a hole with an edge, never a mark that
+// could pass for a drawn figure.
+const silentKinds = new Set();
+for (const s of census) {
+  for (const k of s.kinds) if (k.no_figure) silentKinds.add(`${s.id}:${k.kind}`);
+}
+
+// Every proportion the graph licenses, with its citation. Empty until Agrippa's p. 262
+// was read; two entries now, and they are the only pitches here that are not mine.
+const proportions = JSON.parse(corpus.proportions());
+
+// D3. Mine, and the panel says so.
+const tuning = new Tuning({ tonicCents: 5000, proportions });
+const instrument = new Instrument(tuning);
+const surface = new Surface();
+const sequencer = new Sequencer(surface, instrument, tuning);
+
+// No sky. machinic-hymns' is a horizon under a sun, built for a room with a wall in
+// it; its god rays are the best thing on that screen and the wrong thing on this one.
+// An atlas is a cosmos seen from the inside — there is no horizon to put a sun over,
+// and borrowing the image because it is beautiful would be borrowing what it means.
+// The field colour, the motes and the post chain's vignette carry the depth instead.
+const stage = new Stage(el('scene'));
+stage.add(new Field()); // first, and it is what clears -- see field.js
+const graph = stage.add(new GraphPass());
+stage.add(new Rings(rings(census, idx))); // after GraphPass: it uses that camera
+stage.add(new Motes());
+const piecePass = stage.add(new PiecePass(surface));
+// Glyphs, and names inside empty frames. After the shapes, so text sits over them.
+const atlas = new TextAtlas(stage.gl);
+stage.add(new TextPass(surface, atlas, letterGlyphs(corpus)));
+sequencer.onStep = (piece) => piecePass.flare(piece);
+
+// The spin, and the sound it makes.
+//
+// **`setInterval`, never `requestAnimationFrame`.** `sounds-like`'s scheduler says why and
+// this ignored it on the first attempt, at the cost of an instrument that made no sound at
+// all: *"rAF pauses in background tabs, which would silently stop a performance the moment
+// you switched windows."* It pauses in an unfocused tab too, so the surface was mute
+// whenever it was not the frontmost window — and mute is indistinguishable from a quiet
+// piece, which is why it took a counter on `createOscillator` to find.
+//
+// Drawing may pause when nobody is looking. Sound may not.
+//
+// Real elapsed time rather than a fixed step, so a throttled interval moves the pieces by
+// what actually passed instead of running them slow.
+let last = performance.now();
+setInterval(() => {
+  const now = performance.now();
+  const dt = Math.min(0.25, (now - last) / 1000);
+  last = now;
+  sequencer.tick(dt);
+}, 16);
+stage.setPost(new Post());
+// The murk in machinic-hymns is the week's arc, and there is no week here. Kept high
+// enough that the picture reads: an atlas whose lines you have to squint at would fail
+// §Interface rule 2 from the other direction, by making a cited edge look uncertain.
+stage.lucidity = 0.82;
+stage.start();
+
+// The whole graph, placed once. This is the world the neighbourhood sits inside, and
+// drawing it is what makes a cross-system correspondence legible as a line across the
+// cosmos rather than a line to somewhere off-screen.
+//
+// Deterministic by construction: `place` is a pure function of system, kind and
+// ordinal, so this is the same armillary every load.
+const world = [];
+for (const system of census) {
+  for (const k of system.kinds) {
+    let symbols;
+    try {
+      symbols = JSON.parse(corpus.symbols_of(system.id, k.kind));
+    } catch (err) {
+      continue; // a declared kind holding nothing is a fact, not a failure
+    }
+    for (const node of symbols) {
+      world.push({
+        pos: place(node, idx),
+        noFigure: silentKinds.has(`${system.id}:${k.kind}`),
+      });
+    }
+  }
+}
+graph.setContext(stage, world);
+
+el('graph').innerHTML =
+  `<b>${version.symbols}</b> symbols &nbsp; <b>${version.edges}</b> edges &nbsp; ` +
+  `${census.length} systems`;
+
+let here = null;
+
+/// What licenses this pitch, said plainly.
+///
+/// `sounds-like`'s tuning panel argues the case and is right: naming a thing is not
+/// decoration when the thing is a decision somebody else made for you. So a cited pitch
+/// names its page and an authored one says it is mine.
+///
+/// This published copy shows the ratio alone. The cents, the octave exponent and the
+/// drift from equal temperament are the instrument's own readout — true, and useful at
+/// the keyboard, but they read as diagnostics to someone meeting the piece for the first
+/// time. `web/` in `monochord` keeps them.
+function pitchLine(pitch) {
+  if (!pitch) return `<br><span class="gloss">nothing licenses a pitch here</span>`;
+  const head = ` &nbsp; ${pitch.ratio.replace(/\s*×2\^[-+]?\d+/, '')}`;
+  const gloss =
+    pitch.provenance === 'cited'
+      ? `<span class="cited">${pitch.title}${pitch.locus ? `, ${pitch.locus}` : ''}</span> licenses this pitch`
+      : `this pitch is mine, not the tradition’s`;
+  return `${head}<br><span class="gloss">${gloss}</span>`;
+}
+
+/// The selected piece: what it is, what it will play, and whose silence it is if it
+/// cannot be played at all.
+function describe(piece) {
+  if (!piece) { el('piece').innerHTML = ''; return; }
+  const silence = piece.playable
+    ? ''
+    : `<div class="gloss">no figure to read — ${piece.node.system}:${piece.node.kind} is a kind ` +
+      `its source prints nothing for, so this shape can be held and not played</div>`;
+  el('piece').innerHTML =
+    `<div class="head">${piece.node.label}</div>` +
+    `<div class="addr">${piece.address}</div>` +
+    `<div>${piece.steps.length} step${piece.steps.length === 1 ? '' : 's'} · ` +
+    `<button data-act="slower">−</button> ${piece.rate.toFixed(2)}× <button data-act="faster">+</button>` +
+    ` · <button data-act="mute">${piece.muted ? 'unmute' : 'mute'}</button>` +
+    ` · <button data-act="drop">remove</button></div>` +
+    silence;
+
+  for (const b of el('piece').querySelectorAll('button')) {
+    b.onclick = () => {
+      const act = b.dataset.act;
+      if (act === 'drop') { surface.remove(piece); describe(null); return; }
+      if (act === 'mute') piece.muted = !piece.muted;
+      if (act === 'faster' || act === 'slower') {
+        const i = RATES.indexOf(piece.rate);
+        const at = i < 0 ? RATES.indexOf(1) : i;
+        piece.rate = RATES[Math.max(0, Math.min(RATES.length - 1, at + (act === 'faster' ? 1 : -1)))];
+      }
+      describe(piece);
+    };
+  }
+}
+
+/// Stand somewhere: draw its cited neighbourhood, and sustain it.
+const standAt = guard('standing somewhere', function standAt(address, { play = true, place_ = true } = {}) {
+  let hood;
+  try {
+    hood = JSON.parse(corpus.neighbourhood(address, 1));
+  } catch (err) {
+    el('where').innerHTML = `<span class="label">${address}</span><span class="addr">not in this graph</span>`;
+    return;
+  }
+  here = hood;
+
+  const positions = new Map();
+  const nodes = hood.nodes.map((n) => {
+    const pos = place(n, idx);
+    positions.set(n.address, pos);
+    return {
+      pos,
+      distance: n.distance,
+      noFigure: silentKinds.has(`${n.system}:${n.kind}`),
+    };
+  });
+
+  // Only edges the kernel returned, and both endpoints are guaranteed present because
+  // `neighbourhood` returns the induced subgraph.
+  const edges = hood.edges.map((e) => ({
+    from: positions.get(e.from),
+    to: positions.get(e.to),
+    confidence: e.confidence,
+  }));
+
+  graph.setNeighbourhood(stage, nodes, edges);
+  // The world stays put; the camera turns to face you. See `GraphPass.faceToward`.
+  graph.faceToward(positions.get(hood.centre) ?? centroid([...positions.values()]));
+
+  const centre = hood.nodes.find((n) => n.address === hood.centre);
+  const pitch = centre ? tuning.pitch(centre) : null;
+  el('where').innerHTML =
+    `<span class="label">${centre?.label ?? hood.centre}</span>` +
+    `<span class="addr">${hood.centre}</span>` +
+    pitchLine(pitch);
+
+  // Placing is what makes the walk a composition: the trail you leave is the piece.
+  if (place_ && centre) {
+    const piece = surface.place(centre, {
+      silentKind: silentKinds.has(`${centre.system}:${centre.kind}`) ? centre.kind : null,
+    });
+    describe(piece);
+  }
+
+  // The account: how much of what you are hearing is yours.
+  const tally = tuning.account(hood.nodes);
+  el('tuning').innerHTML =
+    `tonic <b>${tuning.tonicHz.toFixed(2)} Hz</b> — mine<br>` +
+    `<span class="cited">${tally.cited} cited</span> · ` +
+    `<span class="authored">${tally['authored:degree']} authored</span> · ` +
+    `${tally.unpitched} unpitched`;
+
+  // Walk to play: the edges out of here, each labelled, each playable.
+  const out = hood.edges.filter((e) => e.from === hood.centre || e.to === hood.centre);
+  el('neighbours').innerHTML = out
+    .map((e, i) => {
+      const other = e.from === hood.centre ? e.to : e.from;
+      const node = hood.nodes.find((n) => n.address === other);
+      const cls = e.confidence === 'contested' ? ' contested' : '';
+      return `<button data-to="${other}" data-i="${i}">` +
+        `<span class="rel${cls}">${e.relation}</span> ${node?.label ?? other}</button>`;
+    })
+    .join('');
+
+  for (const b of el('neighbours').querySelectorAll('button')) {
+    b.onclick = () => {
+      const e = out[Number(b.dataset.i)];
+      // Moving articulates the hop, with its own label's timbre.
+      const to = hood.nodes.find((n) => n.address === b.dataset.to);
+      const p = to ? tuning.pitch(to) : null;
+      if (instrument.ctx) {
+        if (p) instrument.tone(p.hz, e.confidence, instrument.now);
+        else instrument.struck(instrument.now);
+      }
+      standAt(b.dataset.to);
+    };
+  }
+
+  if (play && instrument.ctx) instrument.sustain(hood.nodes);
+});
+
+// Reaching an address directly. Never ranked: the kernel returns address order and
+// this does not re-sort it.
+el('q').oninput = guard('search', () => {
+  const q = el('q').value;
+  if (!q.trim()) { el('hits').innerHTML = ''; return; }
+  const hits = JSON.parse(corpus.search(q, 24));
+  el('hits').innerHTML = hits
+    .map((h) => `<button data-to="${h.address}">${h.label} <span class="a">${h.address}</span></button>`)
+    .join('');
+  for (const b of el('hits').querySelectorAll('button')) {
+    b.onclick = () => { el('q').value = ''; el('hits').innerHTML = ''; standAt(b.dataset.to); };
+  }
+});
+
+// Selecting and moving a piece. Surface coordinates, aspect-corrected the same way the
+// shader is, so what you grab is what you see.
+function toSurface(ev) {
+  const w = innerWidth;
+  const h = innerHeight;
+  const aspect = w / h;
+  const nx = (ev.clientX / w) * 2 - 1;
+  const ny = 1 - (ev.clientY / h) * 2;
+  return aspect > 1 ? [nx * aspect, ny] : [nx, ny / aspect];
+}
+
+let dragging = null;
+const canvas = el('scene');
+
+let orbiting = null;
+
+canvas.addEventListener('pointerdown', guard('pointer', (ev) => {
+  const [x, y] = toSurface(ev);
+  const hit = surface.at(x, y);
+  canvas.setPointerCapture(ev.pointerId);
+
+  // Empty space turns the camera; a shape moves. `Surface.at` already draws that line.
+  if (!hit) {
+    orbiting = { x: ev.clientX, y: ev.clientY };
+    return;
+  }
+  surface.selected = hit;
+  dragging = { piece: hit, dx: hit.x - x, dy: hit.y - y };
+  describe(hit);
+  // Selecting a piece points the map at its symbol, without placing a second copy.
+  standAt(hit.address, { place_: false });
+}));
+
+canvas.addEventListener('pointermove', guard('pointer', (ev) => {
+  if (orbiting) {
+    graph.orbit((ev.clientX - orbiting.x) / innerWidth, (ev.clientY - orbiting.y) / innerHeight);
+    orbiting = { x: ev.clientX, y: ev.clientY };
+    return;
+  }
+  if (!dragging) return;
+  const [x, y] = toSurface(ev);
+  dragging.piece.x = x + dragging.dx;
+  dragging.piece.y = y + dragging.dy;
+}));
+
+canvas.addEventListener('pointerup', (ev) => {
+  dragging = null;
+  orbiting = null;
+  if (canvas.hasPointerCapture(ev.pointerId)) canvas.releasePointerCapture(ev.pointerId);
+});
+
+canvas.addEventListener('wheel', (ev) => {
+  ev.preventDefault();
+  graph.dolly(ev.deltaY * 0.0012);
+}, { passive: false });
+
+const score = new ScoreView(el('scoreview'), surface, tuning);
+// The score is a panel of rules and text, so it redraws on its own timer rather than
+// riding the WebGL frame — and on `setInterval`, for the same reason the sequencer does.
+setInterval(() => score.draw(), 60);
+
+addEventListener('keydown', guard('a key', (ev) => {
+  if (ev.target instanceof HTMLInputElement) return; // typing in the search box
+
+  if ((ev.key === 'Backspace' || ev.key === 'Delete') && surface.selected) {
+    surface.remove(surface.selected);
+    describe(null);
+    return;
+  }
+  const k = ev.key.toLowerCase();
+  if (k === 'm') {
+    // Everything, at once. See `Instrument.mute`: a ramp on the master gain, so what was
+    // already scheduled is caught too.
+    const muted = instrument.toggleMute();
+    el('keys').classList.toggle('muted', muted);
+    el('keys').textContent = muted
+      ? 'MUTED — M to unmute · S score'
+      : 'M mute · S score';
+  }
+  if (k === 's') {
+    score.toggle();
+  }
+}));
+
+/// A handle on the live instrument, for the console.
+///
+/// Deliberate and kept. This surface has now twice gone silent in a way that looked like
+/// a quiet piece — once from a renamed property, once from a sequencer that was not
+/// ticking — and in both cases the fastest question to answer was "is anything running at
+/// all", which needs a reference to ask. Nothing reads this; it exists to be poked.
+window.__mono = { surface, sequencer, instrument, tuning, graph, stage, corpus };
+
+el('hint').onclick = () => {
+  instrument.start();
+  sequencer.start();
+  el('hint').remove();
+};
+
+// Somewhere to begin. The busiest junction in the graph is the decan, so start beside
+// one rather than in a corner.
+standAt('astro:decan/leo-2', { play: false, place_: false });
+</script>
+</body>
+</html>
