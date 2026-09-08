@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-published>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -47,6 +47,22 @@
     border-top: 1px solid rgba(244,244,242,0.14);
   }
 
+  #pane {
+    position: fixed; z-index: 6; inset: 6vh 6vw; overflow: auto;
+    background: rgba(7,7,11,0.96); border: 1px solid rgba(244,244,242,0.16);
+    padding: 18px 22px; color: var(--ink);
+  }
+  #pane header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font: 0.72rem var(--mono); letter-spacing: 0.16em; color: var(--dim);
+    margin-bottom: 14px;
+  }
+  #pane header b { color: var(--ink); font-weight: normal; }
+  #pane pre {
+    font: 11.5px/1.55 var(--mono); white-space: pre-wrap; margin: 0 0 20px;
+    color: var(--ink);
+  }
+  #pane #note { color: var(--meridian); }
 
   #keys {
     bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -108,7 +124,8 @@
 <div id="tuning" class="panel"></div>
 <div id="fault" class="panel" hidden></div>
 <canvas id="scoreview" hidden></canvas>
-<div id="keys" class="panel">M mute · S score</div>
+<div id="pane" hidden><header><b>the piece, as Strudel</b><span id="panehint">S closes · select the text to copy</span></header><pre id="patch"></pre><pre id="note"></pre></div>
+<div id="keys" class="panel">M mute · S score · P the piece</div>
 <div id="piece" class="panel"></div>
 
 <div id="hint"><p>The atlas, as an instrument.<small>click to begin — audio needs a gesture</small></p></div>
@@ -130,6 +147,9 @@ import { Sequencer } from './sequencer.js';
 import { TextAtlas, letterGlyphs } from './text.js';
 import { TextPass } from './textpass.js';
 import { ScoreView } from './score.js';
+import { DIAGNOSTIC } from './diagnostic.js';
+import { toStrudel } from './strudel.js';
+import { programmeNote } from './note.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -257,7 +277,12 @@ graph.setContext(stage, world);
 
 el('graph').innerHTML =
   `<b>${version.symbols}</b> symbols &nbsp; <b>${version.edges}</b> edges &nbsp; ` +
-  `${census.length} systems`;
+  `${census.length} systems` + (DIAGNOSTIC ? `<br>${version.hash}` : '');
+
+/// The key legend, written once. The markup carries the same text so the bar is not
+/// blank before this runs; `P` is only offered when the pane it opens exists.
+const LEGEND = `M mute · S score${DIAGNOSTIC ? ' · P the piece' : ''}`;
+el('keys').textContent = LEGEND;
 
 let here = null;
 
@@ -265,15 +290,22 @@ let here = null;
 ///
 /// `sounds-like`'s tuning panel argues the case and is right: naming a thing is not
 /// decoration when the thing is a decision somebody else made for you. So a cited pitch
-/// names its page and an authored one says it is mine.
+/// names its page, an authored one says it is mine, and the **drift from equal
+/// temperament** is shown either way — because the drift is the tuning, and a fifth that
+/// reads +2¢ is audibly not a piano's.
 ///
-/// This published copy shows the ratio alone. The cents, the octave exponent and the
-/// drift from equal temperament are the instrument's own readout — true, and useful at
-/// the keyboard, but they read as diagnostics to someone meeting the piece for the first
-/// time. `web/` in `monochord` keeps them.
+/// The published copy shows the ratio alone; see `diagnostic.js` for what that hides and
+/// why the ratio is never among it.
 function pitchLine(pitch) {
   if (!pitch) return `<br><span class="gloss">nothing licenses a pitch here</span>`;
-  const head = ` &nbsp; ${pitch.ratio.replace(/\s*×2\^[-+]?\d+/, '')}`;
+  const drift = pitch.drift >= 0 ? `+${pitch.drift.toFixed(0)}` : pitch.drift.toFixed(0);
+  // Published: the ratio alone. `tuning.js` builds it as `4:3 ×2^-1`, so the octave
+  // exponent is stripped here rather than upstream — the value keeps it, the reader
+  // does not.
+  const head = DIAGNOSTIC
+    ? ` &nbsp; ${pitch.ratio} &nbsp; ${pitch.cents.toFixed(0)}¢ ` +
+      `<span class="drift">${drift}¢ from a piano</span>`
+    : ` &nbsp; ${pitch.ratio.replace(/\s*×2\^[-+]?\d+/, '')}`;
   const gloss =
     pitch.provenance === 'cited'
       ? `<span class="cited">${pitch.title}${pitch.locus ? `, ${pitch.locus}` : ''}</span> licenses this pitch`
@@ -296,6 +328,7 @@ function describe(piece) {
     `<button data-act="slower">−</button> ${piece.rate.toFixed(2)}× <button data-act="faster">+</button>` +
     ` · <button data-act="mute">${piece.muted ? 'unmute' : 'mute'}</button>` +
     ` · <button data-act="drop">remove</button></div>` +
+    (DIAGNOSTIC ? `<div class="gloss">the rate is mine; the pattern is the figure</div>` : '') +
     silence;
 
   for (const b of el('piece').querySelectorAll('button')) {
@@ -474,6 +507,15 @@ const score = new ScoreView(el('scoreview'), surface, tuning);
 // riding the WebGL frame — and on `setInterval`, for the same reason the sequencer does.
 setInterval(() => score.draw(), 60);
 
+/// The piece, as text you can take away. Rebuilt on open rather than kept live: it is a
+/// snapshot of an arrangement, and a patch that rewrote itself under the cursor while you
+/// were reading it would be useless for copying.
+function showPane() {
+  el('patch').textContent = toStrudel(surface, tuning, version);
+  el('note').textContent = programmeNote(surface, tuning, version);
+  el('pane').hidden = false;
+}
+
 addEventListener('keydown', guard('a key', (ev) => {
   if (ev.target instanceof HTMLInputElement) return; // typing in the search box
 
@@ -489,12 +531,18 @@ addEventListener('keydown', guard('a key', (ev) => {
     const muted = instrument.toggleMute();
     el('keys').classList.toggle('muted', muted);
     el('keys').textContent = muted
-      ? 'MUTED — M to unmute · S score'
-      : 'M mute · S score';
+      ? `MUTED — M to unmute · S score${DIAGNOSTIC ? ' · P the piece' : ''}`
+      : LEGEND;
   }
   if (k === 's') {
     score.toggle();
+    if (el('pane').hidden === false) el('pane').hidden = true;
   }
+  if (k === 'p' && DIAGNOSTIC) {
+    if (el('pane').hidden) showPane();
+    else el('pane').hidden = true;
+  }
+  if (ev.key === 'Escape') el('pane').hidden = true;
 }));
 
 /// A handle on the live instrument, for the console.

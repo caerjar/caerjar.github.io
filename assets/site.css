@@ -30,6 +30,9 @@ img,svg{max-width:100%}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.85fr);gap:64px;align-items:start}
 .hero h1{font:400 44px/1.05 var(--serif);max-width:600px;margin:10px 0 24px;letter-spacing:-.02em}
 .hero p{max-width:540px;font-size:15px;margin:0}
+/* the credentials line: where the work has actually been shown */
+.venues{margin-top:26px;padding-top:13px;border-top:1px solid var(--line);max-width:540px;
+        font-size:10px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted);line-height:2}
 .rule{width:32px;border-top:1px solid var(--ink);margin:20px 0}
 .visual{aspect-ratio:4/3;border:1px solid var(--line);overflow:hidden;
         background:linear-gradient(155deg,#dfdbd0 0%,#c7c3b8 54%,#eeeae0 100%)}
@@ -42,9 +45,16 @@ img,svg{max-width:100%}
               border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:2px}
 .section h2{font:400 31px/1 var(--serif);margin:0;letter-spacing:.03em}
 
-/* ---- work cards (index) ---- */
+/* ---- featured work cards (index) ---- */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
        gap:0;border-left:1px solid var(--line);margin-top:26px}
+/* six lead works, larger, so the page reads as a selection rather than a list */
+.cards.featured{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+.cards.featured .thumb{aspect-ratio:16/10}
+.cards.featured h3{font-size:26px;line-height:1.1;margin-bottom:10px}
+.cards.featured .blurb{font-size:13px}
+.cards.featured .body{padding:18px 24px 0}
+.cards.featured .card{padding-bottom:22px}
 .card{display:flex;flex-direction:column;border-right:1px solid var(--line);
       border-bottom:1px solid var(--line);padding:0 0 18px;transition:background .18s ease}
 a.card:hover{background:rgba(23,23,21,.035);text-decoration:none}
@@ -54,17 +64,25 @@ a.card:hover{background:rgba(23,23,21,.035);text-decoration:none}
 .card .top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}
 .card h3{font:400 20px/1.15 var(--serif);margin:0 0 8px}
 .card .blurb{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 14px}
-.card .cardmeta{margin:auto 0 0;padding-top:10px;border-top:1px solid var(--line)}
+.card .cardmeta,.card .cardvenue{margin:auto 0 0;padding-top:11px;border-top:1px solid var(--line)}
+.card .cardvenue{color:var(--ink);letter-spacing:.09em}
 a.card:hover h3{text-decoration:underline;text-underline-offset:3px}
 
-/* ---- plain index rows (works with no page yet) ---- */
-.work-row{display:grid;grid-template-columns:42px minmax(200px,1.4fr) 74px minmax(200px,1fr);
-          gap:18px;align-items:baseline;border-bottom:1px solid var(--line);padding:13px 0}
+/* ---- the index: everything not featured, scannable in one pass ---- */
+.index-head{margin-top:64px}
+.rows{border-top:1px solid var(--line);margin-top:2px}
+.work-row{display:grid;grid-template-columns:38px minmax(180px,1.15fr) 78px minmax(200px,1.35fr);
+          gap:20px;align-items:baseline;border-bottom:1px solid var(--line);padding:14px 2px;
+          transition:background .16s ease}
+a.work-row:hover{background:rgba(23,23,21,.035);text-decoration:none}
+a.work-row:hover .work-title{text-decoration:underline;text-underline-offset:3px}
 .num,.year,.meta{font-size:10px;color:var(--muted)}
-.work-title{font-size:14px}
+.meta{text-transform:uppercase;letter-spacing:.07em}
+.work-title{font:400 17px/1.2 var(--serif)}
 
 /* ---- about ---- */
 .about p{font:400 21px/1.42 var(--serif);max-width:760px;margin:0}
+.about.two-col{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:56px;align-items:start}
 
 /* ---- project page ---- */
 .proj-head{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:48px;align-items:end;

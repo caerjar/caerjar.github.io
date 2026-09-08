@@ -22,6 +22,8 @@
 // Drawn on a 2D canvas rather than in WebGL. It is a table of rules and text, and the glyph
 // atlas exists for marks on shapes, not for setting type.
 
+import { DIAGNOSTIC } from './diagnostic.js';
+
 const FIELD = '#07070b';
 const INK = '#f4f4f2';
 const MERIDIAN = '#34e08a';
@@ -152,5 +154,18 @@ export class ScoreView {
       ctx.fillStyle = DIM;
       ctx.fillText(`${n}·${piece.rate.toFixed(2)}×`, w - 90, y - 13);
     });
+
+    // Every stave has its own playhead because every shape turns at its own rate; there is
+    // no shared bar line, and drawing one would imply a common metre the pieces do not have.
+    // The caption says so for a reader who has not been told; see `diagnostic.js`.
+    if (DIAGNOSTIC) {
+      ctx.fillStyle = DIM;
+      ctx.font = 'italic 11px "Iowan Old Style", Palatino, Georgia, serif';
+      ctx.fillText(
+        'one stave per shape · each turns at its own rate, so there is no shared bar line',
+        16,
+        h - 14
+      );
+    }
   }
 }
