@@ -7,7 +7,10 @@
 <link rel="stylesheet" href="monochord.css">
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--field); }
-  #scene { position: fixed; inset: 0; display: block; }
+  /* `touch-action: none` or the browser claims every drag for scroll and pinch for page
+     zoom, and the atlas never sees a gesture. This one line is the whole difference
+     between "works with a mouse" and "works with a finger". */
+  #scene { position: fixed; inset: 0; display: block; touch-action: none; }
 
   .panel {
     position: fixed; z-index: 2; color: var(--ink);
@@ -109,6 +112,83 @@
   }
   #hint p { font: italic 1.3rem var(--serif); color: var(--ink); max-width: 30ch; text-align: center; }
   #hint small { display: block; margin-top: 1.2rem; font: 0.72rem var(--mono); color: var(--dim); letter-spacing: 0.16em; }
+
+  /* ------------------------------------------------------------------ *
+     The transport, for a screen with no keyboard.
+
+     Every action this instrument had was a key — M, S, P, Backspace — which on a kiosk
+     panel with no keyboard is no action at all. These are the same verbs with a surface
+     you can hit with a thumb.
+
+     44px is the floor for every target, from Apple's HIG and Google's 48dp; the old
+     `#hits button` was 14px tall, which is a target you hit by luck. On an 800x480 panel
+     the bar costs 56px of 480, which is the cheapest 12% this interface spends.
+   * ------------------------------------------------------------------ */
+  #transport {
+    position: fixed; z-index: 7; left: 0; right: 0; bottom: 0; height: 56px;
+    display: flex; align-items: center; gap: 8px; padding: 0 10px;
+    background: rgba(7,7,11,0.88); border-top: 1px solid rgba(244,244,242,0.14);
+    /* The bar is chrome; the atlas behind it is the work. Only the buttons take events. */
+    pointer-events: none;
+  }
+  #transport > * { pointer-events: auto; }
+  .tbtn {
+    min-width: 44px; height: 44px; padding: 0 12px;
+    background: transparent; border: 1px solid rgba(244,244,242,0.20); border-radius: 3px;
+    color: var(--ink); font: 0.72rem var(--mono); letter-spacing: 0.10em;
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+  }
+  /* `:active` and `[aria-pressed]`, never `:hover` — a finger has no hover, so a
+     hover-only affordance is invisible on this screen. */
+  .tbtn:active { border-color: var(--meridian); color: var(--meridian); }
+  .tbtn[aria-pressed="true"] { border-color: var(--meridian); color: var(--meridian); }
+  .tbtn[disabled] { opacity: 0.32; }
+  #tnow {
+    flex: 1; min-width: 0; text-align: right; color: var(--dim);
+    font: 0.72rem var(--mono); letter-spacing: 0.06em;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  #tnow b { color: var(--ink); font-weight: normal; }
+
+  /* ---- The 800x480 panel, and anything else short or narrow ---- *
+     Written on height as well as width: the failure at 480px tall is the bottom-left
+     census colliding with the transport, which a width query never sees. */
+  @media (max-width: 900px), (max-height: 560px) {
+    #where { top: 10px; left: 12px; max-width: 30ch; font-size: 0.68rem; }
+    #where .label { font-size: 1.05rem; }
+    #find { top: 10px; right: 12px; width: 15ch; }
+    #find input { height: 40px; font-size: 0.74rem; }
+    #hits { max-height: 40vh; }
+    #hits button { min-height: 40px; padding: 8px 0; }
+    /* The census and the tuning readout are reference, not controls. They lose to the
+       transport, which is the thing you actually operate. */
+    #graph, #tuning, #keys { display: none; }
+    #piece { display: none; }
+    #scoreview { height: calc(60vh - 56px); bottom: 56px; }
+
+    /* The neighbour list becomes a drawer. At 800px it cannot sit over the atlas and
+       leave the atlas visible at the same time, so it is summoned and dismissed instead
+       of always-on. On a wide screen it stays exactly where it was. */
+    /* `top` clears `#where` rather than starting at 0. The paths are paths *out of the
+       symbol named above them*, so covering that name with the list is the one overlap
+       that costs the reader the thing the list is about.
+       This value is only the resting one — `fitDrawer` measures the real heading and
+       overwrites it, because the heading's height depends on how long the citation is. */
+    #neighbours {
+      top: 112px; bottom: 56px; left: 0; width: 260px; max-width: 62vw;
+      background: rgba(7,7,11,0.94); border-right: 1px solid rgba(244,244,242,0.14);
+      border-top: 1px solid rgba(244,244,242,0.14);
+      padding: 12px 14px; overflow-y: auto; -webkit-overflow-scrolling: touch; z-index: 6;
+    }
+    /* Above the drawer, and given a ground so the atlas does not show through the type.
+       Never clipped: the citation is the load-bearing line on this panel, and half a
+       citation is worse than none — it names a source you cannot check. The drift goes
+       instead, which is a diagnostic the published build already hides. */
+    #where { z-index: 8; background: rgba(7,7,11,0.86); padding: 6px 10px 8px; }
+    #where .drift { display: none; }
+    #neighbours button { min-height: 40px; padding: 8px 0; }
+  }
 </style>
 </head>
 <body>
@@ -126,6 +206,18 @@
 <canvas id="scoreview" hidden></canvas>
 <div id="pane" hidden><header><b>the piece, as Strudel</b><span id="panehint">S closes · select the text to copy</span></header><pre id="patch"></pre><pre id="note"></pre></div>
 <div id="keys" class="panel">M mute · S score · P the piece</div>
+
+<!-- The transport. Same verbs the keys had, reachable with a thumb. `aria-pressed` is
+     both the state and the styling hook, so there is one source for "is it on". -->
+<div id="transport">
+  <button class="tbtn" id="tnear" aria-pressed="false" title="neighbours">paths</button>
+  <button class="tbtn" id="tmute" aria-pressed="false" title="mute">mute</button>
+  <button class="tbtn" id="tscore" aria-pressed="false" title="score">score</button>
+  <span id="tnow"></span>
+  <button class="tbtn" id="tslower" title="slower">&minus;</button>
+  <button class="tbtn" id="tfaster" title="faster">+</button>
+  <button class="tbtn" id="tdrop" title="remove">&times;</button>
+</div>
 <div id="piece" class="panel"></div>
 
 <div id="hint"><p>The atlas, as an instrument.<small>click to begin — audio needs a gesture</small></p></div>
@@ -339,18 +431,37 @@ function describe(piece) {
     silence;
 
   for (const b of el('piece').querySelectorAll('button')) {
-    b.onclick = () => {
-      const act = b.dataset.act;
-      if (act === 'drop') { surface.remove(piece); describe(null); return; }
-      if (act === 'mute') piece.muted = !piece.muted;
-      if (act === 'faster' || act === 'slower') {
-        const i = RATES.indexOf(piece.rate);
-        const at = i < 0 ? RATES.indexOf(1) : i;
-        piece.rate = RATES[Math.max(0, Math.min(RATES.length - 1, at + (act === 'faster' ? 1 : -1)))];
-      }
-      describe(piece);
-    };
+    b.onclick = () => act(piece, b.dataset.act);
   }
+  syncTransport();
+}
+
+/// One verb, two surfaces.
+///
+/// The piece panel and the transport must not each own a copy of what `faster` means:
+/// the panel is a desktop affordance and the transport is the only one on a kiosk
+/// screen, and a rate that stepped differently depending on which you pressed would be
+/// a bug nobody could see in either one alone.
+function act(piece, what) {
+  if (!piece) return;
+  if (what === 'drop') { surface.remove(piece); describe(null); return; }
+  if (what === 'mute') piece.muted = !piece.muted;
+  if (what === 'faster' || what === 'slower') {
+    const i = RATES.indexOf(piece.rate);
+    const at = i < 0 ? RATES.indexOf(1) : i;
+    piece.rate = RATES[Math.max(0, Math.min(RATES.length - 1, at + (what === 'faster' ? 1 : -1)))];
+  }
+  describe(piece);
+}
+
+/// The transport reads the selection; it never holds its own copy of it.
+function syncTransport() {
+  const p = surface.selected;
+  el('tnow').innerHTML = p
+    ? `<b>${p.node.label}</b> · ${p.rate.toFixed(2)}×${p.muted ? ' · muted' : ''}`
+    : 'nothing placed';
+  for (const id of ['tslower', 'tfaster', 'tdrop']) el(id).disabled = !p;
+  el('tnear').setAttribute('aria-pressed', String(!el('neighbours').hidden));
 }
 
 /// Stand somewhere: draw its cited neighbourhood, and sustain it.
@@ -509,10 +620,112 @@ canvas.addEventListener('wheel', (ev) => {
   graph.dolly(ev.deltaY * 0.0012);
 }, { passive: false });
 
+/// Pinch to dolly, on a screen where there is no wheel.
+///
+/// `wheel` was the only way to change the distance, and a touch panel does not have one.
+/// Two fingers is the gesture everyone already knows, and the ratio of the spread to what
+/// it was last frame maps onto the same `dolly` the wheel drives, so there is one camera
+/// and not a touch camera beside it.
+///
+/// Live pointers are tracked here rather than in `pointerdown` because the second finger
+/// has to *cancel* a drag already in progress: you put one finger down on a shape, add a
+/// second to zoom, and without this the shape follows the first finger across the screen
+/// while the camera moves under it.
+const live = new Map();
+let spread = 0;
+
+function spreadOf() {
+  const [a, b] = [...live.values()];
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+canvas.addEventListener('pointerdown', (ev) => {
+  live.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (live.size === 2) {
+    // A pinch is not a drag that grew a finger. Drop both, or the shape rides along.
+    dragging = null;
+    orbiting = null;
+    spread = spreadOf();
+  }
+});
+
+canvas.addEventListener('pointermove', (ev) => {
+  if (!live.has(ev.pointerId)) return;
+  live.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+  if (live.size !== 2) return;
+  const now = spreadOf();
+  if (spread > 0 && now > 0) {
+    // Log ratio, so a pinch feels the same at every distance: closing the gap by half
+    // moves the camera as far as doubling it does, in the other direction.
+    graph.dolly(-Math.log(now / spread) * 1.6);
+  }
+  spread = now;
+});
+
+for (const kind of ['pointerup', 'pointercancel', 'pointerleave']) {
+  canvas.addEventListener(kind, (ev) => {
+    live.delete(ev.pointerId);
+    // Going 2 -> 1 must not resume a drag with a stale anchor, and must re-arm cleanly
+    // if a third finger lands. The remaining finger simply does nothing until it lifts.
+    if (live.size < 2) spread = 0;
+  });
+}
+
+
 const score = new ScoreView(el('scoreview'), surface, tuning);
 // The score is a panel of rules and text, so it redraws on its own timer rather than
 // riding the WebGL frame — and on `setInterval`, for the same reason the sequencer does.
 setInterval(() => score.draw(), 60);
+
+/// The drawer starts closed on a tight screen and open on a wide one.
+///
+/// Same element, same toggle, different resting state: on 800x480 the paths list covers
+/// a third of the atlas, so it is summoned; on a desktop there is room for it to simply
+/// be there, which is how this instrument has always read.
+const TIGHT = matchMedia('(max-width: 900px), (max-height: 560px)');
+el('neighbours').hidden = TIGHT.matches;
+
+/// Sit the drawer under the heading, whatever height the heading turned out to be.
+///
+/// A constant does not work here and the reason is in the corpus rather than in the CSS:
+/// Agrippa's *Three Books of Occult Philosophy, Book II, ch. XXVI, p. 262* wraps to two
+/// lines where `iching:hexagram/41` does not, so the heading is 128px for one symbol and
+/// 78px for the next. Pick the tall number and every short symbol wastes 50px of a
+/// 480px screen; pick the short one and the citation is covered exactly when it is long
+/// enough to matter.
+///
+/// `ResizeObserver` rather than a call after each place: the heading is rewritten from
+/// several paths — placing, selecting, walking an edge — and one of them will eventually
+/// forget to call this. The box measuring itself cannot forget.
+function fitDrawer() {
+  const n = el('neighbours');
+  if (!TIGHT.matches) { n.style.top = ''; return; }
+  n.style.top = `${Math.ceil(el('where').getBoundingClientRect().bottom) + 8}px`;
+}
+new ResizeObserver(fitDrawer).observe(el('where'));
+TIGHT.addEventListener('change', () => { el('neighbours').hidden = TIGHT.matches; fitDrawer(); });
+
+/// The transport, wired to the same verbs the keys drive.
+el('tmute').onclick = () => {
+  const muted = instrument.toggleMute();
+  el('tmute').setAttribute('aria-pressed', String(muted));
+  el('tmute').textContent = muted ? 'muted' : 'mute';
+  el('keys').classList.toggle('muted', muted);
+  el('keys').textContent = muted ? `MUTED — M to unmute · S score` : LEGEND;
+};
+el('tscore').onclick = () => {
+  score.toggle();
+  el('tscore').setAttribute('aria-pressed', String(!el('scoreview').hidden));
+};
+el('tnear').onclick = () => {
+  const n = el('neighbours');
+  n.hidden = !n.hidden;
+  el('tnear').setAttribute('aria-pressed', String(!n.hidden));
+};
+el('tslower').onclick = () => act(surface.selected, 'slower');
+el('tfaster').onclick = () => act(surface.selected, 'faster');
+el('tdrop').onclick = () => act(surface.selected, 'drop');
+syncTransport();
 
 /// The piece, as text you can take away. Rebuilt on open rather than kept live: it is a
 /// snapshot of an arrangement, and a patch that rewrote itself under the cursor while you
