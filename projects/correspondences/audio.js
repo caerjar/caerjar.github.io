@@ -17,8 +17,26 @@
 //   the same way. The rule is about *derivation*, not about the dial existing: `tone`
 //   takes a `level` from the piece, and no code path anywhere computes one from
 //   `EpistemicLabel`.
-// - **Brightness is forbidden** for the same reason — a low-passed note reads as a
-//   weaker note.
+// - **Brightness may not carry a label**, which is narrower than the "brightness is
+//   forbidden" this said first, and narrower in exactly the way the loudness rule above
+//   already had to become.
+//
+//   The first wording banned the filter, not the ranking. But a note whose cutoff opens
+//   on the attack and settles back is how an oscillator stops sounding like a test tone
+//   and starts sounding like something with a body — `sounds-like`'s `instruments.ts`
+//   calls the sweep *"the single cheapest thing that makes two timbres sound like two
+//   instruments rather than two pitches"*, and it is right. Refusing it did not protect
+//   the reader from a ranking; it just made every voice a bare sine.
+//
+//   So the sweep is here, and it is **the same sweep for every label**. `_sweep` takes
+//   no label and is not reachable from one: the filter is opened by the note's own
+//   frequency and duration, both of which the graph fixes. Two notes of the same pitch
+//   and length are indistinguishable in brightness whether one is `established` and the
+//   other `contested` — which is the property the rule exists to protect. What still
+//   cannot happen is brightness *derived from* a label, and nothing computes one.
+//
+//   The test is the same one loudness gets: if you can hear which claim is better
+//   supported, that is the violation. You cannot. You can hear that a note begins.
 // - **Timbre is admissible**, because it is categorical. Two tones beating is not "less"
 //   than one pure tone, it is *two sources disagreeing*.
 //
@@ -45,6 +63,53 @@
 const PEAK = 0.16; // one gain for everything. See the note above.
 const DETUNE_TRADITIONAL = 4; // cents. Transmitted through many hands.
 const DETUNE_CONTESTED = 18; // cents. Wide enough that you hear the beat, not a chorus.
+
+const REVERB_S = 2.4;   // long enough to be a room, short enough not to smear a figure
+const SEND = 0.20;      // how much of the sum goes to the room
+
+/// A room, synthesised rather than sampled.
+///
+/// Exponentially decaying noise is the cheapest impulse response that sounds like
+/// somewhere, and it ships nothing: an atlas that has to fetch a WAV to sound right is
+/// an atlas that sounds wrong offline, which this whole stack is built to avoid.
+///
+/// Seeded, like every other generator here. `sounds-like`'s `bus.ts` makes the same call
+/// for the same reason — an instrument that differs run to run cannot be tuned by ear,
+/// and a render that differs run to run cannot be diffed.
+function impulse(ctx, seconds = REVERB_S) {
+  const n = Math.floor(ctx.sampleRate * seconds);
+  const buf = ctx.createBuffer(2, n, ctx.sampleRate);
+  let s = 0x9e3779b9;
+  for (let ch = 0; ch < 2; ch++) {
+    const data = buf.getChannelData(ch);
+    for (let i = 0; i < n; i++) {
+      s ^= s << 13; s ^= s >>> 17; s ^= s << 5;
+      const white = ((s >>> 0) % 20000) / 10000 - 1;
+      // Power curve, not linear: a linear tail sounds like a gate closing.
+      data[i] = white * Math.pow(1 - i / n, 2.6);
+    }
+  }
+  return buf;
+}
+
+/// tanh, as a lookup table for a WaveShaper.
+///
+/// The instrument sums an unbounded number of voices — every node of a neighbourhood can
+/// sustain at once — and `PEAK / sqrt(n)` keeps the *average* in range without bounding
+/// the peak. Two voices in phase still clip, and digital clipping is a buzz that has
+/// nothing to do with the music.
+///
+/// A soft knee instead: quiet passages pass through very nearly untouched, and a dense
+/// one compresses rather than shatters.
+function softClip() {
+  const n = 1024;
+  const curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const x = (i / (n - 1)) * 2 - 1;
+    curve[i] = Math.tanh(x * 1.7);
+  }
+  return curve;
+}
 
 /// A short burst of white noise, built once and reused.
 function noiseBuffer(ctx, seconds = 0.5) {
@@ -81,12 +146,37 @@ export class Instrument {
 
   /// Browsers will not start an AudioContext without a gesture, so this is called from
   /// the first click rather than at load.
+  /// The bus:
+  ///
+  ///     voices -> out -> shaper -> destination
+  ///                 \-> send -> room -> wet -^
+  ///
+  /// The room hangs off `out` and not off the voices, which is what keeps `mute` honest:
+  /// pulling `out` down silences the send as well, so a muted instrument does not go on
+  /// ringing for two and a half seconds. Everything meets again at the shaper, so the
+  /// limiter sees the sum — the only place it can do any good.
+  ///
+  /// One convolver for the whole instrument, as a send. It is by far the most expensive
+  /// node in this graph and there must never be one per voice.
   start() {
     if (this.ctx) return;
     this.ctx = new AudioContext();
+
     this.out = this.ctx.createGain();
     this.out.gain.value = 1;
-    this.out.connect(this.ctx.destination);
+
+    this.shaper = this.ctx.createWaveShaper();
+    this.shaper.curve = softClip();
+    this.shaper.oversample = '2x';   // or the knee folds harmonics back as aliasing
+    this.shaper.connect(this.ctx.destination);
+    this.out.connect(this.shaper);
+
+    this.room = this.ctx.createConvolver();
+    this.room.buffer = impulse(this.ctx);
+    const send = this.ctx.createGain();
+    send.gain.value = SEND;
+    this.out.connect(send).connect(this.room).connect(this.shaper);
+
     this.noise = noiseBuffer(this.ctx);
   }
 
@@ -158,6 +248,11 @@ export class Instrument {
     // Exponential ramps cannot reach zero, hence the floor rather than 0.
     env.gain.exponentialRampToValueAtTime(0.0001, at + Math.max(attack + 0.02, wanted));
 
+    // The sweep. See the header: no label reaches this, and it cannot — `_sweep` is
+    // given the note's frequency and its duration and nothing else.
+    const voice = this._sweep(at, hz, wanted);
+    voice.connect(env);
+
     const detunes = this._detunesFor(label);
     for (const cents of detunes) {
       const osc = ctx.createOscillator();
@@ -166,7 +261,7 @@ export class Instrument {
         : 'sine';
       osc.frequency.value = hz;
       osc.detune.value = cents;
-      osc.connect(env);
+      osc.connect(voice);
       osc.start(at);
       osc.stop(at + dur + 0.05);
     }
@@ -190,6 +285,37 @@ export class Instrument {
     }
 
     return env;
+  }
+
+  /// A filter that opens on the onset and settles back — the note *speaking*.
+  ///
+  /// **This function takes no label and must never take one.** That is the whole of the
+  /// argument in the header: brightness derived from a claim's standing would be a
+  /// ranking, brightness derived from the note's own pitch and length is a timbre. The
+  /// two arguments here are both fixed by the graph before any label is read.
+  ///
+  /// The cutoff is a multiple of the note's own frequency rather than a fixed Hz, or the
+  /// sweep would be an event for a low note and inaudible for a high one — the same
+  /// gesture has to land the same way across six octaves of corpus.
+  _sweep(at, hz, dur) {
+    const ctx = this.ctx;
+    const f = ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.Q.value = 1.1;    // a little emphasis at the corner, so the movement is audible
+
+    const open = Math.min(hz * 9, ctx.sampleRate / 2 - 1000);
+    const rest = Math.min(hz * 2.6, ctx.sampleRate / 2 - 1000);
+    // Fast enough to be part of the attack rather than a separate wash, and squeezed
+    // into short notes for the same reason the amplitude envelope is: a fixed 90 ms
+    // sweep on a 60 ms note is a note that never finishes speaking.
+    const span = Math.min(0.09, Math.max(0.012, dur * 0.5));
+
+    f.frequency.setValueAtTime(rest, at);
+    f.frequency.linearRampToValueAtTime(open, at + span);
+    f.frequency.exponentialRampToValueAtTime(rest, at + Math.max(span + 0.03, dur));
+    // Returned unconnected: the caller owns both ends, oscillators in and its own
+    // envelope out.
+    return f;
   }
 
   _detunesFor(label) {
