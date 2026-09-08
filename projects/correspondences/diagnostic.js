@@ -18,7 +18,6 @@
 // - the cents, the octave exponent, and the drift from equal temperament — *"the drift
 //   is the tuning, and a fifth that reads +2¢ is audibly not a piano's"*
 // - the score caption, and the piece panel's note on whose the rate is
-// - `this pitch is mine, not the tradition's`, the line under an **authored** pitch
 // - the Strudel pane and its `P` key, which exist so a piece can leave the page
 //
 // What they share is that they answer questions you only have once you are working. To
@@ -29,8 +28,9 @@
 // stands, and so does the ratio it warrants — hiding either would leave a pitch with no
 // stated warrant, which is the one thing this apparatus exists to refuse.
 //
-// The authored line is the exception, and it is one because it asserts no source. With it
-// gone, what marks an authored pitch is the **absence** of a citation under it rather
-// than a sentence saying so, and the census keeps the tally — `n cited · n authored ·
-// n unpitched` — so the split is still stated on the page.
+// An authored pitch says nothing at all, here or at the keyboard — `this pitch is mine,
+// not the tradition's` was removed outright rather than gated, so there is one behaviour
+// to reason about instead of two. What marks authorship is the **absence** of a citation
+// under the ratio, and the census keeps the tally — `n cited · n authored · n unpitched`.
+// See `pitchLine` in `index.html`.
 export const DIAGNOSTIC = !document.documentElement.hasAttribute('data-published');

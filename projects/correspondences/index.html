@@ -290,12 +290,18 @@ let here = null;
 ///
 /// `sounds-like`'s tuning panel argues the case and is right: naming a thing is not
 /// decoration when the thing is a decision somebody else made for you. So a cited pitch
-/// names its page, an authored one says it is mine, and the **drift from equal
-/// temperament** is shown either way — because the drift is the tuning, and a fifth that
-/// reads +2¢ is audibly not a piano's.
+/// names its page, and the **drift from equal temperament** is shown at the keyboard —
+/// because the drift is the tuning, and a fifth that reads +2¢ is audibly not a piano's.
 ///
-/// The published copy shows the ratio alone; see `diagnostic.js` for what that hides and
-/// why the ratio is never among it.
+/// An authored pitch says nothing. It used to read `this pitch is mine, not the
+/// tradition's`, which was accurate and, on a line that appears under most symbols in the
+/// graph, insistent. What marks an authored pitch now is the **absence** of a source
+/// under it — the same fact, stated by omission, and the census keeps the tally
+/// (`n cited · n authored · n unpitched`) so the split is still on the page.
+///
+/// This is not a published-only cut: the instrument does not say it either, so there is
+/// one behaviour to reason about rather than two. See `diagnostic.js` for what the
+/// published copy does hide.
 function pitchLine(pitch) {
   if (!pitch) return `<br><span class="gloss">nothing licenses a pitch here</span>`;
   const drift = pitch.drift >= 0 ? `+${pitch.drift.toFixed(0)}` : pitch.drift.toFixed(0);
@@ -306,14 +312,11 @@ function pitchLine(pitch) {
     ? ` &nbsp; ${pitch.ratio} &nbsp; ${pitch.cents.toFixed(0)}¢ ` +
       `<span class="drift">${drift}¢ from a piano</span>`
     : ` &nbsp; ${pitch.ratio.replace(/\s*×2\^[-+]?\d+/, '')}`;
-  // Published: the citation still speaks, the authored line does not. What marks an
-  // authored pitch is then the **absence** of a source under it rather than a sentence
-  // saying so — a quieter encoding of the same fact, and the census keeps the tally
-  // (`n cited · n authored · n unpitched`) so the split is still stated somewhere.
+  // A citation speaks; authorship is silent and read from the gap where one would be.
   const gloss =
     pitch.provenance === 'cited'
       ? `<span class="cited">${pitch.title}${pitch.locus ? `, ${pitch.locus}` : ''}</span> licenses this pitch`
-      : DIAGNOSTIC ? `this pitch is mine, not the tradition’s` : '';
+      : '';
   return gloss ? `${head}<br><span class="gloss">${gloss}</span>` : head;
 }
 
