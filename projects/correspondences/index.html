@@ -22,7 +22,7 @@
   #where .gloss { color: var(--dim); letter-spacing: 0; font-family: var(--serif); font-style: italic; }
 
   #piece {
-    bottom: 64px; right: 24px; text-align: right; max-width: 34ch;
+    bottom: 120px; right: 24px; text-align: right; max-width: 34ch;
   }
   #piece .head { font: italic 1.05rem var(--serif); letter-spacing: 0; }
   #piece .addr { color: var(--meridian); }
@@ -42,13 +42,108 @@
   }
   #fault b { color: var(--mark); font-weight: normal; }
 
+  /* The score is now a pane: the staves, and the hand that changes them. */
+  #scorepane {
+    /* `bottom: 56px`, not 0: the transport is `z-index: 7` and would otherwise sit on
+       top of the mix row, which is how the first build hid three knobs behind it. */
+    position: fixed; z-index: 5; left: 0; right: 0; bottom: 56px;
+    /* Bounded, or the pane is as tall as its contents want to be and runs off the top of
+       the screen — on an 800x480 panel that swallowed the atlas whole and clipped the
+       first stave. The staves give way, not the controls: the rack keeps its natural
+       height and the canvas shrinks into whatever is left. */
+    max-height: calc(100vh - 56px);
+    display: flex; flex-direction: column;
+    background: var(--field); border-top: 1px solid rgba(244,244,242,0.14);
+  }
+  /* Setting `display` on an element BEATS the user-agent's `[hidden] { display: none }`,
+     so without this the pane is `display: flex` from the first paint and the score is
+     open before anybody asks for it. */
+  #scorepane[hidden] { display: none; }
   #scoreview {
     /* `left: 0; right: 0` does not stretch a canvas: it is a replaced element and keeps
        an intrinsic width, so the score drew into the left third of the screen and looked
-       clipped. An explicit width is required. */
-    position: fixed; z-index: 5; left: 0; bottom: 0; width: 100vw; height: 46vh;
-    border-top: 1px solid rgba(244,244,242,0.14);
+       clipped. An explicit size is required, hence `width: 100%` and a fixed height
+       rather than `flex: 1`, which would leave the backing store one frame behind. */
+    display: block; width: 100%; height: 34vh;
+    /* `flex: 1 1 auto` with `min-height` so it can be squeezed by the bound above but
+       never to nothing. `resize()` measures `clientHeight`, so the backing store follows
+       whatever flex settles on. */
+    flex: 1 1 auto; min-height: 90px;
+    /* The staves are a control surface now — tapping one selects that shape — so the
+       browser must not claim the gesture for a scroll. */
+    touch-action: manipulation;
   }
+
+  /* ---- the rack ---- */
+  #rack {
+    flex: 0 0 auto; max-height: 60vh; overflow-y: auto;
+    border-top: 1px solid rgba(244,244,242,0.10);
+    padding: 8px 12px 12px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .rackrow {
+    display: flex; align-items: center; gap: 14px;
+    padding: 6px 0; min-height: 62px;
+  }
+  .rackrow.mix { border-top: 1px dashed rgba(244,244,242,0.10); }
+  .rackrow.empty { opacity: 0.45; }
+  .rackwho {
+    min-width: 15ch; display: flex; flex-direction: column; gap: 2px;
+    font: 0.72rem var(--mono); letter-spacing: 0.06em;
+  }
+  .rackwho b { color: var(--ink); font-weight: normal; }
+  .rackwho span { color: var(--dim); font-size: 0.66rem; }
+
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip {
+    min-height: 40px; padding: 0 10px;
+    background: transparent; border: 1px solid rgba(244,244,242,0.18); border-radius: 3px;
+    color: var(--dim); font: 0.70rem var(--mono); letter-spacing: 0.08em;
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    display: inline-flex; align-items: center; justify-content: center; white-space: nowrap;
+  }
+  .chip.wide { min-width: 44px; }
+  .chip:active { border-color: var(--meridian); color: var(--meridian); }
+  /* The chosen voice, and never on `:hover` — a finger has none. */
+  .chip[aria-pressed="true"] { border-color: var(--meridian); color: var(--meridian); }
+  .chip[disabled] { opacity: 0.3; cursor: default; }
+  .stepper { display: flex; align-items: center; gap: 6px; }
+  .rateout {
+    min-width: 5ch; text-align: center;
+    font: 0.72rem var(--mono); color: var(--ink);
+  }
+
+  /* ---- knobs ----
+     The dial is turned by one custom property; see `knob.js` for why that matters. */
+  .knob {
+    display: grid; justify-items: center; gap: 2px;
+    /* A grid rather than a flex column so the readout cannot shove the dial around as
+       the number changes width. */
+    grid-template-rows: auto auto auto;
+  }
+  .knob .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .dial-hit {
+    width: 46px; height: 46px; display: grid; place-items: center;
+    cursor: ns-resize; touch-action: none; -webkit-tap-highlight-color: transparent;
+  }
+  .dial {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(244,244,242,0.22);
+    background: rgba(244,244,242,0.03);
+    transform: rotate(var(--ang, 0deg));
+    display: grid; justify-items: center;
+  }
+  .dial i {
+    width: 1px; height: 12px; margin-top: 3px;
+    background: var(--meridian); display: block;
+  }
+  .dial-hit:active .dial { border-color: var(--meridian); }
+  .knob .sr-only:focus-visible + .dial-hit .dial { border-color: var(--meridian); }
+  .kname { font: 0.62rem var(--mono); letter-spacing: 0.10em; color: var(--dim); }
+  .kval { font: 0.62rem var(--mono); color: var(--ink); }
 
   #pane {
     position: fixed; z-index: 6; inset: 6vh 6vw; overflow: auto;
@@ -68,15 +163,15 @@
   #pane #note { color: var(--meridian); }
 
   #keys {
-    bottom: 20px; left: 50%; transform: translateX(-50%);
+    bottom: 76px; left: 50%; transform: translateX(-50%);
     color: var(--dim); letter-spacing: 0.16em;
   }
   #keys.muted { color: var(--mark); }
 
-  #graph { bottom: 20px; left: 24px; color: var(--dim); }
+  #graph { bottom: 76px; left: 24px; color: var(--dim); }
   #graph b { color: var(--ink); font-weight: normal; }
 
-  #tuning { bottom: 20px; right: 24px; text-align: right; color: var(--dim); }
+  #tuning { bottom: 76px; right: 24px; text-align: right; color: var(--dim); }
   #tuning .cited { color: var(--meridian); }
   #tuning .authored { color: var(--mark); }
 
@@ -203,7 +298,10 @@
 <div id="graph" class="panel"></div>
 <div id="tuning" class="panel"></div>
 <div id="fault" class="panel" hidden></div>
-<canvas id="scoreview" hidden></canvas>
+<div id="scorepane" hidden>
+  <canvas id="scoreview"></canvas>
+  <div id="rack"></div>
+</div>
 <div id="pane" hidden><header><b>the piece, as Strudel</b><span id="panehint">S closes · select the text to copy</span></header><pre id="patch"></pre><pre id="note"></pre></div>
 <div id="keys" class="panel">M mute · S score · P the piece</div>
 
@@ -239,6 +337,7 @@ import { Sequencer } from './sequencer.js';
 import { TextAtlas, letterGlyphs } from './text.js';
 import { TextPass } from './textpass.js';
 import { ScoreView } from './score.js';
+import { Rack } from './rack.js';
 import { DIAGNOSTIC } from './diagnostic.js';
 import { toStrudel } from './strudel.js';
 import { programmeNote } from './note.js';
@@ -724,10 +823,16 @@ for (const kind of ['pointerup', 'pointercancel', 'pointerleave']) {
 }
 
 
-const score = new ScoreView(el('scoreview'), surface, tuning);
+const score = new ScoreView(el('scoreview'), surface, tuning, el('scorepane'), (piece) => {
+  // A stave was tapped. Everything that shows a selection is refreshed from the one
+  // place, so the score, the piece panel, the rack and the transport cannot disagree
+  // about which shape is in hand.
+  describe(piece);
+});
+const rack = new Rack(el('rack'), surface, instrument, act);
 // The score is a panel of rules and text, so it redraws on its own timer rather than
 // riding the WebGL frame — and on `setInterval`, for the same reason the sequencer does.
-setInterval(() => score.draw(), 60);
+setInterval(() => { score.draw(); if (score.visible) rack.sync(); }, 60);
 
 /// The drawer starts closed on a tight screen and open on a wide one.
 ///
@@ -767,7 +872,7 @@ el('tmute').onclick = () => {
 };
 el('tscore').onclick = () => {
   score.toggle();
-  el('tscore').setAttribute('aria-pressed', String(!el('scoreview').hidden));
+  el('tscore').setAttribute('aria-pressed', String(score.visible));
 };
 el('tnear').onclick = () => {
   const n = el('neighbours');

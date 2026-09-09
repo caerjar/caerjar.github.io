@@ -34,17 +34,39 @@ const ROW = 38;
 const GUTTER = 190;
 
 export class ScoreView {
-  constructor(canvas, surface, tuning) {
+  /**
+   * @param {HTMLCanvasElement} canvas  the staves
+   * @param {Surface} surface
+   * @param {Tuning} tuning
+   * @param {HTMLElement} [pane]  what is actually shown and hidden; the canvas alone if
+   *   nothing is passed, so the score still works without a rack around it
+   * @param {() => void} [onPick]  a stave was tapped and the selection changed
+   */
+  constructor(canvas, surface, tuning, pane = null, onPick = null) {
     this.canvas = canvas;
     this.surface = surface;
     this.tuning = tuning;
+    this.pane = pane ?? canvas;
+    this.onPick = onPick;
     this.ctx = canvas.getContext('2d');
     this.visible = false;
+
+    // A stave is a row, and tapping it selects that shape — the score stops being a
+    // picture of the arrangement and becomes a way into it. The inverse of the same
+    // arithmetic `draw` uses to place the row, kept next to it so the two cannot drift.
+    canvas.addEventListener('pointerdown', (ev) => {
+      const r = canvas.getBoundingClientRect();
+      const i = Math.floor((ev.clientY - r.top - 34 + ROW / 2) / ROW);
+      const piece = this.surface.pieces[i];
+      if (!piece) return;
+      this.surface.selected = piece;
+      if (this.onPick) this.onPick(piece);
+    });
   }
 
   toggle() {
     this.visible = !this.visible;
-    this.canvas.hidden = !this.visible;
+    this.pane.hidden = !this.visible;
     return this.visible;
   }
 

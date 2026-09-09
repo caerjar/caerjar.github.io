@@ -20,6 +20,7 @@
 // procedure; it asserts nothing about the symbol.
 
 import { figureOf, stepsOf } from './figures.js';
+import { DEFAULT_VOICE } from './voices.js';
 
 /// Rates that are simple ratios of each other, so pieces phase rather than smear.
 ///
@@ -61,6 +62,17 @@ export class Piece {
     /// a balance is authored, exactly like the rate and the tonic, and nothing anywhere
     /// reads a label to decide it.
     this.gain = 1;
+    /// Which voice from `voices.js` this shape is played on.
+    ///
+    /// Authored, and on the same footing as `rate` and `gain`: the header of that file
+    /// argues the case, and the short version is that choosing to hear a hexagram on a
+    /// bell asserts nothing about the hexagram. The **graph's** timbre — the detune that
+    /// makes a contested correspondence beat — is applied on top of whatever is chosen
+    /// here and cannot be turned off from this end.
+    ///
+    /// Defaults to the voice the atlas already had, so nothing sounds different until
+    /// somebody asks it to.
+    this.voice = DEFAULT_VOICE;
     /// Set when this symbol's *kind* is declared to have no figure, so the surface can
     /// say whose page is silent instead of showing a blank shape with no explanation.
     this.silentKind = silentKind;

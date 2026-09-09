@@ -67,7 +67,9 @@ export class Sequencer {
       this.instrument.droneOn(
         piece.id,
         pitch.hz,
-        pitch.provenance === 'cited' ? pitch.confidence ?? 'traditional' : 'established'
+        pitch.provenance === 'cited' ? pitch.confidence ?? 'traditional' : 'established',
+        piece.gain,
+        piece.voice
       );
     }
     for (const id of [...this.instrument.drones.keys()]) {
@@ -130,7 +132,10 @@ export class Sequencer {
     // notes. Duration is mine and is the same for every symbol, so nothing about a
     // symbol's importance can leak into how long it rings.
     const dur = step.kind === 'broken' || step.kind === 'double' ? 0.26 : 0.5;
-    this.instrument.tone(pitch.hz, label, at, dur);
+    // `piece.gain` was documented as the composer's level and then not passed — `struck`
+    // took it and `tone` did not, so the mix worked on unpitched shapes and silently did
+    // nothing on every pitched one.
+    this.instrument.tone(pitch.hz, label, at, dur, piece.gain, piece.voice);
   }
 
   start() {

@@ -60,12 +60,17 @@
 // insists on. Spelling it as a note would invent a pitch; spelling it as a rest would
 // claim nothing got there.
 
+import { voiceOf, DEFAULT_VOICE } from './voices.js';
+
 const PEAK = 0.16; // one gain for everything. See the note above.
 const DETUNE_TRADITIONAL = 4; // cents. Transmitted through many hands.
 const DETUNE_CONTESTED = 18; // cents. Wide enough that you hear the beat, not a chorus.
 
 const REVERB_S = 2.4;   // long enough to be a room, short enough not to smear a figure
 const SEND = 0.20;      // how much of the sum goes to the room
+const DELAY_S = 0.375;  // a dotted eighth at 120: lands off the beat, not on it
+
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
 /// A room, synthesised rather than sampled.
 ///
@@ -144,17 +149,19 @@ export class Instrument {
     this.unvoiced = new Set();
   }
 
-  /// Browsers will not start an AudioContext without a gesture, so this is called from
-  /// the first click rather than at load.
-  /// The bus:
+  /// Build the bus. Browsers will not start an AudioContext without a gesture, so this is
+  /// called from the first click rather than at load.
   ///
-  ///     voices -> out -> shaper -> destination
-  ///                 \-> send -> room -> wet -^
+  ///     voices -> out --------------------> shaper -> warmth -> destination
+  ///                 \-> send -> room ----------^
+  ///                 \-> echo -> delay ---------^
+  ///                               ^--- feedback
   ///
-  /// The room hangs off `out` and not off the voices, which is what keeps `mute` honest:
-  /// pulling `out` down silences the send as well, so a muted instrument does not go on
-  /// ringing for two and a half seconds. Everything meets again at the shaper, so the
-  /// limiter sees the sum — the only place it can do any good.
+  /// Both sends hang off `out` and not off the voices, which is what keeps `mute` honest:
+  /// pulling `out` down silences them too, so a muted instrument does not go on ringing
+  /// for two and a half seconds or answering itself for ten. Everything meets again at
+  /// the shaper, so the limiter sees the sum — the only place it can do any good — and
+  /// `warmth` is last because it is a tone control over the finished mix.
   ///
   /// One convolver for the whole instrument, as a send. It is by far the most expensive
   /// node in this graph and there must never be one per voice.
@@ -173,11 +180,56 @@ export class Instrument {
 
     this.room = this.ctx.createConvolver();
     this.room.buffer = impulse(this.ctx);
-    const send = this.ctx.createGain();
-    send.gain.value = SEND;
-    this.out.connect(send).connect(this.room).connect(this.shaper);
+    this.send = this.ctx.createGain();
+    this.send.gain.value = SEND;
+    this.out.connect(this.send).connect(this.room).connect(this.shaper);
+
+    // The delay. A repeat is not a reverb: the room smears a note into a wash, this
+    // restates it. On an instrument where several shapes turn at ratios of each other,
+    // an echo lands either with the next shape or between two of them, and which one it
+    // does is the composer's business — hence a control rather than a constant.
+    //
+    // Feedback is capped well under 1 in `setFx`. A delay that can be driven to
+    // self-oscillate is a way to make a gallery very unpleasant from across the room.
+    this.delay = this.ctx.createDelay(2.0);
+    this.delay.delayTime.value = DELAY_S;
+    this.feedback = this.ctx.createGain();
+    this.feedback.gain.value = 0.32;
+    this.echo = this.ctx.createGain();
+    this.echo.gain.value = 0;          // silent until asked for
+    this.out.connect(this.echo).connect(this.delay);
+    this.delay.connect(this.feedback).connect(this.delay);   // the tail
+    this.delay.connect(this.shaper);
+
+    // Master warmth. A gentle lowpass over everything, which is a *mix* control and not
+    // a per-note one: it cannot distinguish two notes, so it cannot rank them. Wide open
+    // by default so nothing changes until somebody turns it.
+    this.warmth = this.ctx.createBiquadFilter();
+    this.warmth.type = 'lowpass';
+    this.warmth.frequency.value = 20000;
+    this.warmth.Q.value = 0.4;
+    this.shaper.disconnect();
+    this.shaper.connect(this.warmth).connect(this.ctx.destination);
 
     this.noise = noiseBuffer(this.ctx);
+  }
+
+  /// The mix, ramped.
+  ///
+  /// `sounds-like`'s I-4 in one method: *"no `GainNode.gain.value = x`"*. Every one of
+  /// these is a control somebody is turning by hand, which is exactly the case where an
+  /// assignment is audible as a click and a ramp is not.
+  setFx({ room, echo, warmth } = {}) {
+    if (!this.ctx) return;
+    const at = this.now;
+    const ramp = (param, v) => param.setTargetAtTime(v, at, 0.03);
+    if (room !== undefined) ramp(this.send.gain, clamp(room, 0, 0.8));
+    if (echo !== undefined) ramp(this.echo.gain, clamp(echo, 0, 0.7));
+    // Exponential in Hz, because pitch is: a linear sweep of a cutoff spends most of its
+    // travel in a range nobody can hear moving.
+    if (warmth !== undefined) {
+      ramp(this.warmth.frequency, 200 * Math.pow(100, clamp(warmth, 0, 1)));
+    }
   }
 
   get now() {
@@ -227,48 +279,72 @@ export class Instrument {
   /// allowed to change how loud something is. Nothing derives it from `label`: a louder
   /// note would read as a better-supported one, and `EpistemicLabel` orders by declaration
   /// and not by strength. A mix is authored; a ranking is forbidden.
-  tone(hz, label, at, dur = 0.55, level = 1) {
+  tone(hz, label, at, dur = 0.55, level = 1, voiceId = DEFAULT_VOICE) {
     const ctx = this.ctx;
+    const V = voiceOf(voiceId);
     const env = ctx.createGain();
     env.connect(this.out);
     env.gain.setValueAtTime(0, at);
     const peak = PEAK * Math.max(0, Math.min(1, level));
 
-    // One envelope for every label. Only the *shape* of the onset differs, and only
-    // where the label is about how the claim was made rather than how strong it is.
-    //
     // The attack is squeezed INTO the note rather than the note stretched to fit it.
     // `sounds-like` documents what the other way costs: with a 0.35 s attack no note can
     // be shorter than its envelope, so a sixteenth becomes a swell and sixteen of them
     // ring at once. A broken line here is a 0.26 s touch and would have been a drone.
     const wanted = Math.max(0.04, dur);
-    const squeeze = Math.min(1, wanted / Math.max(1e-6, (label === 'speculative' ? 0.09 : 0.012) + 0.05));
-    const attack = Math.max(0.004, (label === 'speculative' ? 0.09 : 0.012) * squeeze);
+    // `speculative` still lengthens its own onset — that is the label speaking, and it is
+    // a *shape*, not a level or a brightness. The voice's attack is the composer's floor
+    // under it; the label may soften an entrance but cannot sharpen one.
+    const want = Math.max(V.env.attack, label === 'speculative' ? 0.09 : 0);
+    const squeeze = Math.min(1, wanted / Math.max(1e-6, want + 0.05));
+    const attack = Math.max(0.003, want * squeeze);
+
+    // Attack, decay to the sustain, then out. A voice with `sustain: 0` is struck and
+    // decays through the note; one with `sustain: 1` is held flat and only released at
+    // the end. This is what separates a bell from an organ, and it is the composer's
+    // choice in both cases — nothing here is read from the graph.
+    const decay = Math.min(V.env.decay, Math.max(0.01, wanted - attack));
+    const floor = 0.0001;
     env.gain.linearRampToValueAtTime(peak, at + attack);
+    if (V.env.sustain < 0.999) {
+      env.gain.exponentialRampToValueAtTime(
+        Math.max(floor, peak * V.env.sustain), at + attack + decay);
+    }
     // Exponential ramps cannot reach zero, hence the floor rather than 0.
-    env.gain.exponentialRampToValueAtTime(0.0001, at + Math.max(attack + 0.02, wanted));
+    env.gain.exponentialRampToValueAtTime(floor, at + Math.max(attack + 0.02, wanted));
 
-    // The sweep. See the header: no label reaches this, and it cannot — `_sweep` is
-    // given the note's frequency and its duration and nothing else.
-    const voice = this._sweep(at, hz, wanted);
-    voice.connect(env);
+    // The sweep. See the header: no label reaches this, and it cannot.
+    const bus = V.sweep > 0 ? this._sweep(at, hz, wanted, V) : ctx.createGain();
+    bus.connect(env);
 
+    // **The stack is the composer's; the detune is the graph's.** Every partial of the
+    // chosen voice gets every one of the label's detunes, so a contested correspondence
+    // beats whatever it is played on and an established one never does. Neither can
+    // suppress the other.
     const detunes = this._detunesFor(label);
-    for (const cents of detunes) {
-      const osc = ctx.createOscillator();
-      osc.type = label === 'unknown' || label === 'emerging' || label === 'in-vitro'
-        ? 'square' // deliberately not a sine: an unvoiced label must not pass for a voiced one
-        : 'sine';
-      osc.frequency.value = hz;
-      osc.detune.value = cents;
-      osc.connect(voice);
-      osc.start(at);
-      osc.stop(at + dur + 0.05);
+    const unvoiced = label === 'unknown' || label === 'emerging' || label === 'in-vitro';
+    for (const part of V.partials) {
+      const g = ctx.createGain();
+      g.gain.value = part.gain * V.norm;
+      g.connect(bus);
+      for (const cents of detunes) {
+        const osc = ctx.createOscillator();
+        // An unvoiced label must not pass for a voiced one, whatever the voice is.
+        osc.type = unvoiced ? 'square' : part.type;
+        osc.frequency.value = hz;
+        osc.detune.value = part.cents + cents;
+        osc.connect(g);
+        osc.start(at);
+        osc.stop(at + dur + 0.05);
+      }
     }
 
-    // A breathed onset for an asserted correspondence. Noise in the attack only — it
-    // colours how the note *begins*, and does not make it quieter or duller once held.
-    if (label === 'speculative') {
+    // Breath. Two sources, and they are different claims:
+    //   - the voice's own `noise`, which is the composer's choice of instrument;
+    //   - `speculative`, which is the graph saying a correspondence was asserted.
+    // They add, so a speculative pluck is breathier than either alone.
+    const breathiness = V.noise + (label === 'speculative' ? 0.5 : 0);
+    if (breathiness > 0) {
       const src = ctx.createBufferSource();
       src.buffer = this.noise;
       const band = ctx.createBiquadFilter();
@@ -277,7 +353,7 @@ export class Instrument {
       band.Q.value = 2;
       const breath = ctx.createGain();
       breath.gain.setValueAtTime(0, at);
-      breath.gain.linearRampToValueAtTime(peak * 0.5, at + 0.03);
+      breath.gain.linearRampToValueAtTime(peak * Math.min(0.9, breathiness), at + 0.03);
       breath.gain.exponentialRampToValueAtTime(0.0001, at + 0.22);
       src.connect(band).connect(breath).connect(this.out);
       src.start(at);
@@ -291,20 +367,27 @@ export class Instrument {
   ///
   /// **This function takes no label and must never take one.** That is the whole of the
   /// argument in the header: brightness derived from a claim's standing would be a
-  /// ranking, brightness derived from the note's own pitch and length is a timbre. The
-  /// two arguments here are both fixed by the graph before any label is read.
+  /// ranking, brightness derived from the note's own pitch and length is a timbre.
+  ///
+  /// `voice` is not a loophole. It is the entry the *composer* chose from `voices.js`,
+  /// the same kind of decision as the tonic and the rate, and it is chosen per placed
+  /// shape — before any of that shape's notes have a label at all. Two notes of the same
+  /// pitch and length on the same voice are identical in brightness whether one is
+  /// `established` and the other `contested`. What still cannot happen is a cutoff
+  /// derived from a claim's standing, and nothing computes one.
   ///
   /// The cutoff is a multiple of the note's own frequency rather than a fixed Hz, or the
   /// sweep would be an event for a low note and inaudible for a high one — the same
   /// gesture has to land the same way across six octaves of corpus.
-  _sweep(at, hz, dur) {
+  _sweep(at, hz, dur, voice) {
     const ctx = this.ctx;
+    const nyq = ctx.sampleRate / 2 - 1000;
     const f = ctx.createBiquadFilter();
     f.type = 'lowpass';
-    f.Q.value = 1.1;    // a little emphasis at the corner, so the movement is audible
+    f.Q.value = voice.q;   // emphasis at the corner, so the movement is audible
 
-    const open = Math.min(hz * 9, ctx.sampleRate / 2 - 1000);
-    const rest = Math.min(hz * 2.6, ctx.sampleRate / 2 - 1000);
+    const open = Math.min(hz * voice.sweep, nyq);
+    const rest = Math.min(hz * 2.6, nyq);
     // Fast enough to be part of the attack rather than a separate wash, and squeezed
     // into short notes for the same reason the amplitude envelope is: a fixed 90 ms
     // sweep on a 60 ms note is a note that never finishes speaking.
@@ -431,19 +514,38 @@ export class Instrument {
   ///
   /// Keyed by piece so it can be stopped when that piece is removed or muted. Ramped in
   /// and out, never assigned — see `mute`.
-  droneOn(id, hz, label = 'established', level = 1) {
+  droneOn(id, hz, label = 'established', level = 1, voiceId = DEFAULT_VOICE) {
     if (!this.ctx || this.drones.has(id)) return;
     const ctx = this.ctx;
-    const osc = ctx.createOscillator();
-    osc.type = label === 'traditional' ? 'triangle' : 'sine';
-    osc.frequency.value = hz;
-    const env = ctx.createGain();
+    const V = voiceOf(voiceId);
     const at = this.now;
+
+    const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, at);
-    env.gain.linearRampToValueAtTime(PEAK * 0.55 * Math.max(0, Math.min(1, level)), at + 0.6);
-    osc.connect(env).connect(this.out);
-    osc.start(at);
-    this.drones.set(id, { osc, env });
+    env.gain.linearRampToValueAtTime(PEAK * 0.55 * clamp(level, 0, 1), at + 0.6);
+    env.connect(this.out);
+
+    // A held shape gets the same stack an articulated one does, so switching a piece's
+    // voice sounds like the same decision whether it is spelling a figure or holding a
+    // proportion. The filter is parked open rather than swept: there is no onset to
+    // speak on, and a filter that swept once at the start and then sat still for ten
+    // minutes would be a click, not a timbre.
+    const oscs = [];
+    for (const part of V.partials) {
+      const g = ctx.createGain();
+      g.gain.value = part.gain * V.norm;
+      g.connect(env);
+      for (const cents of this._detunesFor(label)) {
+        const osc = ctx.createOscillator();
+        osc.type = part.type;
+        osc.frequency.value = hz;
+        osc.detune.value = part.cents + cents;
+        osc.connect(g);
+        osc.start(at);
+        oscs.push(osc);
+      }
+    }
+    this.drones.set(id, { oscs, env });
   }
 
   droneOff(id) {
@@ -453,7 +555,7 @@ export class Instrument {
     held.env.gain.cancelScheduledValues(at);
     held.env.gain.setValueAtTime(held.env.gain.value, at);
     held.env.gain.linearRampToValueAtTime(0, at + 0.3);
-    held.osc.stop(at + 0.35);
+    for (const osc of held.oscs) osc.stop(at + 0.35);
     this.drones.delete(id);
   }
 
