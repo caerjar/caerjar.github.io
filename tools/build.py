@@ -5,7 +5,7 @@ Every fact below is taken from the project's own README / direction.md in
 ~/caerjar. Nothing is invented. Output is plain static HTML: no build step is
 needed to serve it; this script exists to keep 15 pages consistent.
 """
-import pathlib, html
+import pathlib, html, re
 
 ROOT = pathlib.Path("/Users/hackerm0m/caerjar/caerjar.github.io")
 
@@ -151,14 +151,7 @@ means every peer has to pair with you again by phone.</p>
 <p>The passphrase is needed to add documents, create invites, and share bundles. <b>Answering
 questions does not need it</b>, so an instance can serve a whole organization while the key stays
 locked.</p>
-
-<h2>What it refuses to fake</h2>
-<p>With an empty archive it still answers: clearly marked <i>“Not from your archive”</i>, in amber,
-with no citations. Seeded material is attributed as such: a citation reads
-<code>sanctuary-handbook@0.2, added by …</code>, never as though your organization wrote it.</p>
-<p>Three optional seeds exist, none of which run on their own: the project’s own docs, so it can
-explain itself and its own refusal lists; a set of fictional documents that contradict each other on
-purpose; and public sources for a given sector.</p>""",
+""",
   side=[("Roadmap", "v0.1 · single organization <b>(current)</b><br>v0.2 · voice<br>v0.3 · federation between verified peers")],
   links=[("Repository: private", None)]),
 
@@ -395,13 +388,13 @@ chain here is a release mechanism and a ledger of what was issued, not the subje
         ("Traits", "Chapter<br>Generation<br>Illusion<br>Anthropocene Factor<br>Epigenetic Trauma")],
   links=[("Evertunes Studio on OpenSea", "https://opensea.io/evertunes-studio")]),
 
-dict(slug="what-the-tech", venue="Visions2030 Fellowship, 2020", title="What the Tech", sub="Trust, authorship and ethics, written into code",
+dict(slug="ethical-imagination", venue="Visions2030 Fellowship, 2020", title="Ethical Imagination", sub="Trust, authorship and ethics, written into code",
   year="2020", medium="collaboration / smart contract / video",
   status="First-year Visions2030 collaboration",
-  blurb="Verifying origin and intent in an era shaped by forgery and deepfakes.",
+  blurb="Ideas turned into code and recorded as contracts: verifying origin and intent in an era of forgery and deepfakes.",
   lead="A collaboration with conceptual artist Mary Ellen Carroll on questions of trust, authorship "
        "and ethics: carried out through Ethical Imagination, a project supported by Visions2030.",
-  imgs=[("assets/img/plate-what-the-tech.svg", "Idea, code, record: an authorship chain and the seal that closes it.", False)],
+  imgs=[("assets/img/plate-ethical-imagination.svg", "Idea, code, record: an authorship chain and the seal that closes it.", False)],
   prose="""<h2>The question</h2>
 <p>In its first year Visions2030 incubated artist collaborations, pairing artists with scientists,
 engineers, ethicists and technologists to move ideas toward real-world application. This is one of
@@ -680,12 +673,25 @@ it costs to make one, and who gets to.</p>""",
 
 ]
 
+# The front page leads with six works and indexes the rest.
+FEATURED = [
+    "order-of-the-meridian", "sanctuary-cell-division", "evertunes",
+    "ethical-imagination", "heddatron", "mugworts",
+]
+
+# Shown as a credentials line under the opening statement.
+VENUE_STRIP = [
+    "Ars Electronica", "HOPE", "DWeb", "Recurse Center", "Banff Centre",
+    "Visions2030", "HERE Arts Center", "Sphinx",
+]
+
 ORDER = [
-    "order-of-the-meridian", "sanctuary-cell-division", "evertunes", "what-the-tech",
-    "heddatron", "peat-and-repeat", "pgm-diagrams", "prayer-coin", "unpaid-labor-coin",
-    "emu-butch", "mugworts", "kokowa", "paom", "thirteen-bit",
-    "diagrammatic-immanence", "palimpsest", "sigil-studio", "divinatory-os",
-    "sounds-like", "meridian", "dream",
+    # the six featured works lead, so the index numbers run unbroken after them
+    "order-of-the-meridian", "sanctuary-cell-division", "evertunes", "ethical-imagination",
+    "heddatron", "mugworts",
+    "peat-and-repeat", "pgm-diagrams", "prayer-coin", "unpaid-labor-coin", "emu-butch",
+    "kokowa", "paom", "thirteen-bit", "diagrammatic-immanence", "palimpsest",
+    "sigil-studio", "divinatory-os", "sounds-like", "meridian", "dream",
 ]
 P.sort(key=lambda d: ORDER.index(d["slug"]))
 for _i, _d in enumerate(P, 1):
@@ -716,20 +722,39 @@ HERO_SVG = """<svg viewBox="0 0 800 600" role="img" aria-label="Abstract archiva
 
 
 # ------------------------------------------------------------------ build ---
+def flat_venue(pr):
+    """The venue as one line, for a card or an index row."""
+    return re.sub(r"\s*<br>\s*", " · ", pr.get("venue", "")).strip()
+
+
 def build_index():
+    # the index is all diagrams; photographs and screenshots live on the work pages
+    def thumb_of(pr):
+        t = pr.get("card") or pr["imgs"][0][0]
+        return t, next((c for src, c, _ in pr["imgs"] if src == t), pr["sub"])
+
     cards = []
-    for pr in P:
-        # the index is all diagrams; photographs and screenshots live on the work pages
-        thumb = pr.get("card") or pr["imgs"][0][0]
-        alt = next((c for src, c, _ in pr["imgs"] if src == thumb), pr["sub"])
+    for pr in [d for d in P if d["slug"] in FEATURED]:
+        thumb, alt = thumb_of(pr)
+        venue = flat_venue(pr)
         cards.append(f"""    <a class="card" href="projects/{pr['slug']}/">
       <div class="thumb"><img src="{thumb}" alt="{html.escape(alt, quote=True)}" loading="lazy" /></div>
       <div class="body">
-        <div class="top"><span class="smallcaps">{pr['num']}</span><span class="smallcaps">{pr['year']}</span></div>
+        <div class="top"><span class="smallcaps">{pr['medium']}</span><span class="smallcaps">{pr['year']}</span></div>
         <h3>{pr['title']}</h3>
         <p class="blurb">{pr['blurb']}</p>
-        <p class="cardmeta smallcaps">{pr['medium']}</p>
+        {f'<p class="cardvenue smallcaps">{venue}</p>' if venue else ''}
       </div>
+    </a>""")
+
+    rows = []
+    for pr in [d for d in P if d["slug"] not in FEATURED]:
+        venue = flat_venue(pr)
+        rows.append(f"""    <a class="work-row" href="projects/{pr['slug']}/">
+      <span class="num">{pr['num']}</span>
+      <span class="work-title">{pr['title']}</span>
+      <span class="year">{pr['year']}</span>
+      <span class="meta">{venue or pr['medium']}</span>
     </a>""")
 
     body = f"""<main>
@@ -740,6 +765,7 @@ def build_index():
     <h1>Ritual technologies for more livable futures.</h1>
     <div class="rule"></div>
     <p>Art, infrastructures and herbal practice at the intersections of memory, networks, value, care and the more-than-human.</p>
+    <div class="venues">{" · ".join(VENUE_STRIP)}</div>
   </div>
   <div>
     <div class="visual">
@@ -754,8 +780,16 @@ def build_index():
     <h2>Selected Work</h2>
     <div class="smallcaps">an argument, not the whole archive</div>
   </div>
-  <div class="cards">
+  <div class="cards featured">
 {chr(10).join(cards)}
+  </div>
+
+  <div class="section-head index-head">
+    <h2>Index</h2>
+    <div class="smallcaps">the rest of the record</div>
+  </div>
+  <div class="rows">
+{chr(10).join(rows)}
   </div>
 </section>
 
@@ -764,11 +798,17 @@ def build_index():
     <h2>About</h2>
     <div class="smallcaps">professional legibility</div>
   </div>
-  <div class="about">
+  <div class="about two-col">
     <p>Eon Meridian is an artist, writer, technologist and herbalist working across computation,
     medicinal plants, ritual, sound, diagrams and resilient infrastructure. This site is an evolving
-    record of works, collaborations, institutions and experiments. Its sibling:
-    <a href="caerjar.html">Caerjar</a>: is the vessel much of this work is built inside.</p>
+    record of works, collaborations, institutions and experiments. Its sibling,
+    <a href="caerjar.html">Caerjar</a>, is the vessel much of this work is built inside.</p>
+    <div class="side">
+      <span class="smallcaps">Contact</span><br>
+      <a href="caerjar.html#correspondence">Get in touch via Caerjar</a><br><br>
+      <span class="smallcaps">Location</span><br>
+      New York
+    </div>
   </div>
 </section>
 

@@ -345,7 +345,7 @@ PLATES = [
     ("pgm-diagrams",      "PAPYRUS / RUBRIC / OPERATION",   "PGM 01",      "column",   "#a33327"),
     ("evertunes",         "CHAPTER / STORY / RELEASE",      "WESTWARD HO", "chapters", "#b8862f", "#4a6f88"),
     ("emu-butch",         "GATHERING / BLOCK / RUNNING HEAD","BOOK 01",    "codex",    "#2f4a7a"),
-    ("what-the-tech",     "IDEA / CODE / RECORD",           "CONTRACT 01", "contract", "#2f5d7a", "#a33327"),
+    ("ethical-imagination","IDEA / CODE / RECORD",          "CONTRACT 01", "contract", "#2f5d7a", "#a33327"),
     ("peat-and-repeat",   "BOG / BED / EDITION",            "CORE 01",     "core",     "#6b4f2a", "#4f6b3a"),
     ("mugworts",          "PLANT / PART / DOSE",            "MATERIA 01",  "materia",  "#5c6b3a"),
     ("heddatron",         "STAGE / ROBOT / CUE",            "PLOT 01",     "stage",    "#a33327", "#4a6f88"),
