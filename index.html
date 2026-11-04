@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Caerjar</title>
+<meta name="description" content="Caerjar is a workshop for tools, memory, medicine, and mutual aid: building systems that help communities remember, communicate, heal, and act together." />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;600&display=swap" />
+<style>
+:root{
+  --bg:#fbf8ee; --ink:#002fa7; --line:rgba(0,47,167,.38); --faint:rgba(0,47,167,.16);
+  --muted:rgba(0,47,167,.78); --wash:rgba(0,47,167,.05);
+  --sans:"Archivo",Arial,Helvetica,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#06184a; --ink:#f3eedd; --line:rgba(243,238,221,.34); --faint:rgba(243,238,221,.14);
+    --muted:rgba(243,238,221,.78); --wash:rgba(243,238,221,.06);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.sheet{max-width:1400px;margin:0 auto;border-left:1px solid var(--line);border-right:1px solid var(--line);min-height:100vh}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+
+/* top bar */
+.bar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 40px;border-bottom:1px solid var(--line)}
+.bar nav{display:flex;gap:22px}
+.bar a{text-decoration:none}
+.bar nav a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:24px 56px;padding:40px 40px 56px;border-bottom:1px solid var(--line)}
+.wordmark{grid-column:1/-1;font-size:clamp(76px,15.5vw,224px);line-height:.78;font-weight:900;font-stretch:72%;letter-spacing:-.04em;margin-left:-.04em}
+.intro{align-self:end;padding-bottom:12px}
+.intro p{font-size:19px;line-height:1.38;letter-spacing:-.01em;margin-bottom:18px;max-width:38ch}
+.intro p + p{color:var(--muted);font-size:17px}
+.mail{display:inline-flex;align-items:center;gap:40px;margin-top:14px;border:1px solid var(--ink);padding:14px 18px;text-decoration:none;font-family:var(--mono);font-size:13px;letter-spacing:.03em}
+.mail:hover{background:var(--ink);color:var(--bg)}
+
+/* terrain map */
+.map{position:relative;align-self:center;justify-self:center;width:min(640px,100%)}
+.map svg{display:block;width:100%;height:auto;overflow:visible}
+.map .edge{stroke:var(--line);fill:none}
+.map .spoke{stroke:var(--faint);stroke-dasharray:4 5}
+.map .ring{stroke:var(--faint);fill:none}
+.map .cross{stroke:var(--line)}
+.map .node circle{fill:var(--ink);transition:r .15s ease}
+.map .node .halo{fill:none;stroke:var(--ink);stroke-width:1;opacity:0;transition:opacity .15s ease}
+.map .node text{fill:var(--ink);font-family:var(--mono);font-size:15px;letter-spacing:.05em;text-transform:uppercase}
+.map .node .nm{font-family:var(--sans);font-weight:800;font-size:19px;letter-spacing:.01em}
+.map .node:hover .halo,.map .node:focus-visible .halo{opacity:1}
+.map .node:hover .dot,.map .node:focus-visible .dot{r:18}
+.map .node{outline:none;cursor:pointer}
+.map .node:focus-visible .nm{text-decoration:underline}
+
+/* section heads */
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;padding:22px 40px;border-bottom:1px solid var(--line)}
+.head h2{font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.head a{text-decoration:none}
+.head a:hover{text-decoration:underline;text-underline-offset:4px}
+
+/* terrains */
+.terrains{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.terrain{padding:28px 32px 32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);scroll-margin-top:12px;transition:background .3s ease}
+.terrain:nth-child(3n){border-right:0}
+.terrain:nth-last-child(-n+3){border-bottom:0}
+.terrain:target{background:var(--wash)}
+.terrain .t-head{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.terrain h3{font-size:30px;line-height:1;font-weight:900;font-stretch:80%;letter-spacing:-.01em;text-transform:uppercase}
+.terrain .scope{font-size:14px;line-height:1.4;color:var(--muted);margin-bottom:22px;max-width:40ch}
+.terrain ul{list-style:none;border-top:1px solid var(--faint)}
+.terrain li{padding:12px 0;border-bottom:1px solid var(--faint)}
+.terrain li a.t{font-weight:800;font-size:17px;text-decoration:none;letter-spacing:-.005em}
+.terrain li a.t:hover{text-decoration:underline;text-underline-offset:3px}
+.terrain li p{font-size:14px;line-height:1.38;color:var(--muted);margin-top:3px}
+
+/* contact + footer */
+.contact{display:grid;grid-template-columns:minmax(300px,420px) 1fr;gap:20px 56px;padding:40px;border-bottom:1px solid var(--line);align-items:end}
+.contact p{font-size:19px;line-height:1.38;max-width:38ch}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 40px 28px}
+footer a{text-decoration:none}
+footer a:hover{text-decoration:underline;text-underline-offset:4px}
+
+@media (max-width:1100px){
+  .hero{grid-template-columns:1fr}
+  .terrains{grid-template-columns:repeat(2,1fr)}
+  .terrain:nth-child(3n){border-right:1px solid var(--line)}
+  .terrain:nth-child(2n){border-right:0}
+  .terrain:nth-last-child(-n+3){border-bottom:1px solid var(--line)}
+  .terrain:nth-last-child(-n+2){border-bottom:0}
+  .contact{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .bar,.head,footer{padding-left:16px;padding-right:16px}
+  .bar nav{gap:14px}
+  .hero{padding:24px 16px 36px}
+  .contact{padding:28px 16px}
+  .terrains{grid-template-columns:1fr}
+  .terrain{border-right:0!important;border-bottom:1px solid var(--line)!important}
+  .terrain:last-child{border-bottom:0!important}
+  .terrain{padding:24px 16px 28px}
+  .map .node text{font-size:20px}
+  .map .node .nm{font-size:24px}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header class="bar mono">
+  <a href="#top" id="top">Caerjar</a>
+  <nav aria-label="Sections">
+    <a href="#terrain">Terrain</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1 class="wordmark">CAERJAR</h1>
+
+  <div class="intro">
+    <p>Caerjar is a workshop for archives, medicines, local intelligence, resilient networks, and the shared practices that sustain collective life.</p>
+    <p>We build and study technologies that people can understand, maintain, adapt, and make their own: without severing them from land, body, ritual, or relation.</p>
+    <a class="mail" href="mailto:hi@caerjar.com">hi@caerjar.com <span aria-hidden="true">→</span></a>
+  </div>
+
+  <nav class="map" aria-label="The six terrains">
+    <svg viewBox="-140 0 930 650" role="presentation">
+      <circle class="ring" cx="325" cy="325" r="226" />
+      <polygon class="edge" points="325,99 521,212 521,438 325,551 129,438 129,212" />
+      <line class="edge" x1="129" y1="212" x2="521" y2="212" /><line class="edge" x1="129" y1="438" x2="521" y2="438" />
+      <line class="edge" x1="325" y1="99" x2="129" y2="438" /><line class="edge" x1="325" y1="99" x2="521" y2="438" />
+      <line class="spoke" x1="325" y1="99" x2="325" y2="551" /><line class="spoke" x1="129" y1="212" x2="521" y2="438" /><line class="spoke" x1="521" y1="212" x2="129" y2="438" />
+      <line class="cross" x1="305" y1="325" x2="345" y2="325" /><line class="cross" x1="325" y1="305" x2="325" y2="345" />
+
+      <a class="node" href="#t-01"><circle class="halo" cx="325" cy="99" r="26" /><circle class="dot" cx="325" cy="99" r="13" /><text x="325" y="36" text-anchor="middle">01</text><text class="nm" x="325" y="62" text-anchor="middle">Intelligence</text></a>
+      <a class="node" href="#t-02"><circle class="halo" cx="521" cy="212" r="26" /><circle class="dot" cx="521" cy="212" r="13" /><text x="560" y="204">02</text><text class="nm" x="560" y="228">Networks</text></a>
+      <a class="node" href="#t-03"><circle class="halo" cx="129" cy="212" r="26" /><circle class="dot" cx="129" cy="212" r="13" /><text x="90" y="204" text-anchor="end">03</text><text class="nm" x="90" y="228" text-anchor="end">Archives</text></a>
+      <a class="node" href="#t-04"><circle class="halo" cx="325" cy="551" r="26" /><circle class="dot" cx="325" cy="551" r="13" /><text x="325" y="604" text-anchor="middle">04</text><text class="nm" x="325" y="630" text-anchor="middle">Tools</text></a>
+      <a class="node" href="#t-05"><circle class="halo" cx="129" cy="438" r="26" /><circle class="dot" cx="129" cy="438" r="13" /><text x="90" y="430" text-anchor="end">05</text><text class="nm" x="90" y="454" text-anchor="end">Medicine</text></a>
+      <a class="node" href="#t-06"><circle class="halo" cx="521" cy="438" r="26" /><circle class="dot" cx="521" cy="438" r="13" /><text x="560" y="430">06</text><text class="nm" x="560" y="454">Stewardship</text></a>
+    </svg>
+  </nav>
+</section>
+
+<!--
+  TERRAIN: each terrain lists real works, linked to their pages on eonmeridian.github.io.
+  A work line:  <li><a class="t" href="PAGE">Title</a><p>One line from its work.md</p></li>
+-->
+<section id="terrain" aria-labelledby="terrain-h">
+  <div class="head"><h2 id="terrain-h">Terrain</h2><span class="mono">Six areas, the work in each</span></div>
+  <div class="terrains">
+
+    <article class="terrain" id="t-01">
+      <div class="t-head"><span class="mono">01</span><h3>Intelligence</h3></div>
+      <p class="scope">Local agents, decision support, learning systems, and the preservation of human judgment.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/daimon-agent/">daimon</a><p>A coding agent that runs entirely on your own machine</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/research-manager/">research-manager</a><p>A Mac app for deciding what each research thread needs next</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/the-aion-apparatus/">The Aion Apparatus</a><p>An instrument for examining the ethics of made things</p></li>
+      </ul>
+    </article>
+
+    <article class="terrain" id="t-02">
+      <div class="t-head"><span class="mono">02</span><h3>Networks</h3></div>
+      <p class="scope">Radio, mesh, media, coordination, and the movement of information across communities.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/caer-stack/">caer-stack</a><p>Infrastructure a community runs for itself</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/haunted-geography/">Haunted Geography</a><p>Memorial plaques you meet by standing where it happened</p></li>
+      </ul>
+    </article>
+
+    <article class="terrain" id="t-03">
+      <div class="t-head"><span class="mono">03</span><h3>Archives</h3></div>
+      <p class="scope">Archives, organizational memory, retrieval, documentation, oral history, and collective learning.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/meridian/">Meridian</a><p>A personal knowledge OS</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/corpusmith/">Corpusmith</a><p>Files a folder tree through a plan you review, and can move it all back</p></li>
+      </ul>
+    </article>
+
+    <article class="terrain" id="t-04">
+      <div class="t-head"><span class="mono">04</span><h3>Tools</h3></div>
+      <p class="scope">Local-first software, electronics, sensing, resilient stacks, and physical systems that support collective life.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/earshot/">Earshot</a><p>A speech studio that runs on your own machine</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/training/">Training</a><p>A beginner's course in building small apps by describing them to a coding assistant</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/epub-to-pdf/">epub-to-pdf</a><p>Turn an e-book into a PDF for printing, with one fixed set of settings</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/screenplay-formatter/">Screenplay Formatter</a><p>Turns a screenplay typed as plain text into a properly laid-out Word file</p></li>
+      </ul>
+    </article>
+
+    <article class="terrain" id="t-05">
+      <div class="t-head"><span class="mono">05</span><h3>Medicine</h3></div>
+      <p class="scope">Herbal practice, biological systems, ecology, environmental observation, community health, and care work.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/mugworts/">Mugworts Free Herbal Clinic</a><p>Care as collective infrastructure</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/vetiver/">Vetiver</a><p>Examines a medical paper for validity and bias, and shows where every judgement came from</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/drone-cinematographer/">Drone Cinematographer</a><p>A small drone that plans and flies documentary shots of plants without harming them</p></li>
+      </ul>
+    </article>
+
+    <article class="terrain" id="t-06">
+      <div class="t-head"><span class="mono">06</span><h3>Stewardship</h3></div>
+      <p class="scope">Collective action, institutions, resource allocation, ritual, accountability, and decision-making.</p>
+      <ul>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/ethical-imagination/">Ethical Imagination</a><p>Trust, authorship and ethics, written into code</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/unpaid-labor-coin/">Unpaid Labor Coin</a><p>Denominated in the work nobody counted</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/peat-and-repeat/">Peat and Repeat</a><p>An artist-run edition house in Ridgewood</p></li>
+        <li><a class="t" href="https://eonmeridian.github.io/projects/surregional-sangha/">The Surregional Sangha Manifesto</a><p>A speculative praxis for an anarchic spiritual community</p></li>
+      </ul>
+    </article>
+
+  </div>
+</section>
+
+<section class="contact" id="contact" aria-label="Contact">
+  <p>Working on an archive, tool, medicine, network, or system you're tending? We'd like to hear about it.</p>
+  <div><a class="mail" href="mailto:hi@caerjar.com">hi@caerjar.com <span aria-hidden="true">→</span></a></div>
+</section>
+
+<footer class="mono">
+  <span>Caerjar</span>
+  <a href="mailto:hi@caerjar.com">hi@caerjar.com</a>
+  <a href="https://eonmeridian.github.io/">eonmeridian.github.io ↗</a>
+</footer>
+
+</div>
+</body>
+</html>
