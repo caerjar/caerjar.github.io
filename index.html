@@ -69,6 +69,15 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .head a{text-decoration:none}
 .head a:hover{text-decoration:underline;text-underline-offset:4px}
 
+/* services */
+.services{list-style:none;border-bottom:1px solid var(--line)}
+.services li{display:grid;grid-template-columns:56px minmax(0,1.3fr) minmax(0,1fr);gap:8px 24px;align-items:baseline;padding:20px 40px;border-bottom:1px solid var(--faint)}
+.services li:last-child{border-bottom:0}
+.services h3{font-size:24px;line-height:1.05;font-weight:900;font-stretch:85%;text-transform:uppercase;letter-spacing:-.005em}
+.services li div p{font-size:15px;line-height:1.4;color:var(--muted);margin-top:4px;max-width:52ch}
+.services .proof{color:var(--muted);line-height:1.6;text-transform:none;font-size:12.5px}
+.services .proof a{color:var(--ink);text-underline-offset:3px}
+
 /* terrains */
 .terrains{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
 .terrain{padding:28px 32px 32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);scroll-margin-top:12px;transition:background .3s ease}
@@ -99,12 +108,16 @@ footer a:hover{text-decoration:underline;text-underline-offset:4px}
   .terrain:nth-last-child(-n+3){border-bottom:1px solid var(--line)}
   .terrain:nth-last-child(-n+2){border-bottom:0}
   .contact{grid-template-columns:1fr}
+  .services li{grid-template-columns:48px 1fr}
+  .services .proof{grid-column:2}
 }
 @media (max-width:700px){
   .bar,.head,footer{padding-left:16px;padding-right:16px}
   .bar nav{gap:14px}
   .hero{padding:24px 16px 36px}
   .contact{padding:28px 16px}
+  .services li{grid-template-columns:36px 1fr;padding:18px 16px}
+  .services .proof{grid-column:2}
   .terrains{grid-template-columns:1fr}
   .terrain{border-right:0!important;border-bottom:1px solid var(--line)!important}
   .terrain:last-child{border-bottom:0!important}
@@ -120,6 +133,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:4px}
 <header class="bar mono">
   <a href="#top" id="top">Caerjar</a>
   <nav aria-label="Sections">
+    <a href="#services">Services</a>
     <a href="#terrain">Terrain</a>
     <a href="#contact">Contact</a>
   </nav>
@@ -129,7 +143,7 @@ footer a:hover{text-decoration:underline;text-underline-offset:4px}
   <h1 class="wordmark">CAERJAR</h1>
 
   <div class="intro">
-    <p>Caerjar is a workshop for archives, medicines, local intelligence, resilient networks, and the shared practices that sustain collective life.</p>
+    <p>Caerjar is a vessel: a small company for advisory, rapid prototyping and curriculum development in archives, medicines, local intelligence, resilient networks, and the shared practices that sustain collective life.</p>
     <p>We build and study technologies that people can understand, maintain, adapt, and make their own: without severing them from land, body, ritual, or relation.</p>
     <a class="mail" href="mailto:hi@caerjar.com">hi@caerjar.com <span aria-hidden="true">→</span></a>
   </div>
@@ -151,6 +165,22 @@ footer a:hover{text-decoration:underline;text-underline-offset:4px}
       <a class="node" href="#t-06"><circle class="halo" cx="521" cy="438" r="26" /><circle class="dot" cx="521" cy="438" r="13" /><text x="560" y="430">06</text><text class="nm" x="560" y="454">Stewardship</text></a>
     </svg>
   </nav>
+</section>
+
+<section id="services" aria-labelledby="services-h">
+  <div class="head"><h2 id="services-h">What we do</h2><span class="mono">With the work that shows it</span></div>
+  <ol class="services">
+    <li><span class="mono">01</span><div><h3>Advisory</h3><p>Counsel for organizations deciding what to build, adopt or leave alone.</p></div></li>
+    <li><span class="mono">02</span><div><h3>Rapid prototyping</h3><p>A working version in days, to test an idea with the people it is for.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/earshot/">Earshot</a> · <a href="https://eonmeridian.github.io/projects/haunted-geography/">Haunted Geography</a> · <a href="https://eonmeridian.github.io/projects/corpusmith/">Corpusmith</a></p></li>
+    <li><span class="mono">03</span><div><h3>Curriculum development</h3><p>Courses and syllabi that teach people to build and keep their own tools.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/training/">Training</a></p></li>
+    <li><span class="mono">04</span><div><h3>Research and evidence review</h3><p>Close reading of papers, sources and claims, with every judgement traceable.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/vetiver/">Vetiver</a> · <a href="https://eonmeridian.github.io/projects/research-manager/">research-manager</a></p></li>
+    <li><span class="mono">05</span><div><h3>Community infrastructure</h3><p>Systems a group runs and owns itself: servers, networks, local-first software.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/caer-stack/">caer-stack</a></p></li>
+    <li><span class="mono">06</span><div><h3>Archives and knowledge systems</h3><p>Organizing a collection or an organization's memory so it can be found and kept.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/meridian/">Meridian</a> · <a href="https://eonmeridian.github.io/projects/corpusmith/">Corpusmith</a></p></li>
+    <li><span class="mono">07</span><div><h3>Workshops and facilitation</h3><p>Sessions where a group learns a practice by doing it.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/training/">Training</a></p></li>
+    <li><span class="mono">08</span><div><h3>Ethics and governance design</h3><p>How a group decides, who owns what, and how value is counted.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/ethical-imagination/">Ethical Imagination</a> · <a href="https://eonmeridian.github.io/projects/the-aion-apparatus/">The Aion Apparatus</a> · <a href="https://eonmeridian.github.io/projects/unpaid-labor-coin/">Unpaid Labor Coin</a></p></li>
+    <li><span class="mono">09</span><div><h3>Commissions</h3><p>Installations, performance and editions.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/botmatrix/">Botmatrix</a> · <a href="https://eonmeridian.github.io/projects/six-rites/">Six Rites</a> · <a href="https://eonmeridian.github.io/projects/peat-and-repeat/">Peat and Repeat</a></p></li>
+    <li><span class="mono">10</span><div><h3>Herbal and community health programs</h3><p>Clinics and programs that treat care as shared infrastructure.</p></div><p class="proof mono"><a href="https://eonmeridian.github.io/projects/mugworts/">Mugworts Free Herbal Clinic</a></p></li>
+  </ol>
 </section>
 
 <!--
