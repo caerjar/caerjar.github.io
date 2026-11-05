@@ -20,7 +20,7 @@ Static pages, no build, no script. Shared styles in `assets/site.css`; favicon i
 - **Rates**: none published yet. Offerings says "Rates on request" plus a sliding-scale line.
 
 House rules from eonmeridian.github.io apply: no em-dashes, no machine-intelligence vocabulary or
-vendor names, no real name.
+vendor names, no real name. Exception (Eon, 2026-11-05): this site names "AI agent workflows" as an area of work.
 
 ## Preview
 
