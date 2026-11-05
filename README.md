@@ -12,7 +12,7 @@ Static pages, no build, no script. Shared styles in `assets/site.css`; favicon i
 
 ## Content
 
-- **Mission**: "We help communities own the tools they depend on." It appears on Home and Offerings.
+- **Mission**: "We help our clients own the tools they depend on." It appears on Home and Offerings.
 - **Offerings**: three. Care (herbal and community health) and commissions (installations, performance,
   editions) are not offered for hire on this site; that work stays on the Work page.
 - **Works**: every work listed is a real work with a page on eonmeridian.github.io; its one line is
