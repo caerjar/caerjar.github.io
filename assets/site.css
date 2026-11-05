@@ -70,7 +70,7 @@ a:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 .terrains{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
 .terrain{padding:28px 32px 32px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);scroll-margin-top:12px;transition:background .3s ease}
 .terrain:nth-child(3n){border-right:0}
-.terrain:nth-last-child(-n+3){border-bottom:0}
+.terrain:nth-last-child(-n+2){border-bottom:0}
 .terrain:target{background:var(--wash)}
 .terrain .t-head{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
 .terrain h3{font-size:30px;line-height:1;font-weight:900;font-stretch:80%;letter-spacing:-.01em;text-transform:uppercase}
@@ -93,8 +93,8 @@ footer a:hover{text-decoration:underline;text-underline-offset:4px}
   .terrains{grid-template-columns:repeat(2,1fr)}
   .terrain:nth-child(3n){border-right:1px solid var(--line)}
   .terrain:nth-child(2n){border-right:0}
-  .terrain:nth-last-child(-n+3){border-bottom:1px solid var(--line)}
-  .terrain:nth-last-child(-n+2){border-bottom:0}
+  .terrain:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+  .terrain:last-child{border-bottom:0}
   .contact{grid-template-columns:1fr}
   .services li{grid-template-columns:48px 1fr}
   .services .proof{grid-column:2}

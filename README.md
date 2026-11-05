@@ -8,7 +8,7 @@ Static pages, no build, no script. Shared styles in `assets/site.css`; favicon i
 |---|---|---|
 | Home | `index.html` | Mission, the terrain map, the three offerings in brief, contact |
 | Offerings | `offerings/index.html` | Advise, Build, Teach: what each includes, what you leave with, the work that shows it; rates note |
-| Work | `work/index.html` | The six terrains (Intelligence, Networks, Archives, Tools, Medicine, Stewardship) and the works in each |
+| Work | `work/index.html` | The five terrains (Intelligence, Networks, Archives, Tools, Stewardship) and the works in each |
 
 ## Content
 
