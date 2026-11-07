@@ -18,7 +18,7 @@ submissions directly, point its `action` at a form service such as Formspree.
 
 ## Content
 
-- **Mission**: "We help our clients own the tools they depend on." It appears on Home and Offerings.
+- **Mission** (Eon's words): "Caerjar exists to build technology that expands human and collective autonomy." Followed by "We help our clients own the tools they depend on." Both appear on Home and What we do.
 - **Offerings**: three. Care (herbal and community health) and commissions (installations, performance,
   editions) are not offered for hire on this site; that work stays on the Work page.
 - **Works**: every work listed is a real work with a page on eonmeridian.github.io; its one line is
