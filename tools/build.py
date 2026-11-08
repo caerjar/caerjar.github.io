@@ -104,6 +104,9 @@ def build(slug, card):
              if (base / i["src"]).exists() or (PORTFOLIO / i["src"]).exists()]
     if not imgs and (PORTFOLIO / f"assets/img/plate-{slug}.svg").exists():
         imgs = [(f"assets/img/plate-{slug}.svg", head.get("sub", head["title"]))]
+    own = ROOT / "assets" / "plates" / f"{slug}.svg"  # a plate drawn for this site replaces any other
+    if own.exists():
+        imgs = [(str(own), imgs[0][1] if imgs else head.get("sub", head["title"]))]
     figs = "\n".join(
         f'  <figure><img src="{image(slug, s, base)}" alt="{esc(c)}" loading="lazy" />'
         f"<figcaption>{c}</figcaption></figure>" for s, c in imgs)
