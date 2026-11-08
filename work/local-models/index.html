@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Local models · Caerjar</title>
+<meta name="description" content="A model server and a fine-tuning setup for running an open-weight model entirely on one machine." />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>Local models</h1>
+  <p class="lede">A model server and fine-tuning that run on your own machine</p>
+</div>
+
+<p class="col">A model server and a fine-tuning setup for running an open-weight model entirely on one machine. The server listens only on the machine itself, reads the weights from a local copy and never touches the network.</p>
+
+
+
+<div class="work-body">
+  <div class="prose col">
+<h2>The model server</h2>
+<p>One script starts the server and leaves it running; anything that speaks the common chat interface can use it, so the agent and the server can be swapped independently. A second script runs the same model under a different server, and fixes the two settings that otherwise break it silently: the size of the context window and the template that lets the model call tools. The two servers were measured against each other on the same tasks and came out the same.</p>
+<p>The weights are fetched once with a resumable download, so a dropped connection doesn't restart an 18 GB transfer.</p>
+<h2>Fine-tuning</h2>
+<p>A small adapter can be trained on your own commits, so the model picks up your style rather than being told about it. The data comes from your own repositories, leaving out merges, reverts, work-in-progress commits and generated files. Training is conservative by default and is stopped when the validation loss stops falling.</p>
+<p>The adapter is judged against the base model on real tasks, watching tool calling most closely. If it gets worse, deleting the adapter puts everything back as it was. For most people it is not worth it: memory and conventions learned from git history capture what matters, in a form you can read and correct.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>software / local AI</dd>
+    <dt>Runs on</dt><dd>One laptop with 48 GB of memory, with no network</dd>
+    <dt>Model</dt><dd>An open-weight model of about 18 GB</dd>
+    <dt>Used by</dt><dd><a href="../daimon-agent/">daimon</a></dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>

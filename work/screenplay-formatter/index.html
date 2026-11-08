@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Screenplay Formatter · Caerjar</title>
+<meta name="description" content="A small converter that takes a screenplay written as a plain text file and produces a properly formatted screenplay Word file, matching the standard US layout of a reference PDF: title page, scene headings, centred character cues, indented dialogue and right-aligned transitions." />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>Screenplay Formatter</h1>
+  <p class="lede">Turns a screenplay typed as plain text into a properly laid-out Word file</p>
+</div>
+
+<p class="col">A small converter that takes a screenplay written as a plain text file and produces a properly formatted screenplay Word file, matching the standard US layout of a reference PDF: title page, scene headings, centred character cues, indented dialogue and right-aligned transitions.</p>
+
+<div class="figs">
+  <figure><img src="../../assets/img/screenplay-formatter-plate-screenplay-formatter.svg" alt="Plain text in, a screenplay page out: scene headings, centred character names, indented dialogue." loading="lazy" /><figcaption>Plain text in, a screenplay page out: scene headings, centred character names, indented dialogue.</figcaption></figure>
+</div>
+
+<div class="work-body">
+  <div class="prose col">
+<h2>Layout only</h2>
+<p>The converter changes layout and never content, and blank lines in the source are kept.</p>
+<h2>Seven kinds of line</h2>
+<p>Every line of the source becomes exactly one screenplay element (scene heading, character cue, parenthetical, dialogue, action, transition or a kept blank line) by explicit rules plus a small table of exceptions, so the same text always comes out the same way. A line in brackets is a parenthetical only directly under a character cue; the lines the rules cannot safely tell apart, such as a bracketed aside that is really a stage direction, are named one by one in the exceptions table.</p>
+<h2>The page</h2>
+<p>Courier New 12 point on US Letter, with a 1.5 inch left margin and 1 inch elsewhere. Dialogue is indented 1.0 inch, parentheticals 1.6 inches and character cues 2.2 inches; transitions sit flush right, and scene headings and action run flush left. The page-break markers of a printed script, (MORE) and (CONT'D), are left out, because Word reflows the text.</p>
+<h2>Use</h2>
+<p>Drop the text file into the input folder, run one make command, and the Word file appears in the output folder under the same name. Docker, Make and git are the only requirements.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>software / text / film</dd>
+    <dt>In</dt><dd>a screenplay as plain text</dd>
+    <dt>Out</dt><dd>a .docx in standard US screenplay layout</dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>

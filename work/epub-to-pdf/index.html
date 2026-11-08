@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>epub-to-pdf · Caerjar</title>
+<meta name="description" content="A shell script that converts an EPUB to a PDF using Calibre&#x27;s ebook-convert with fixed settings, so every book comes out the same way." />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>epub-to-pdf</h1>
+  <p class="lede">Turn an e-book into a PDF for printing, with one fixed set of settings</p>
+</div>
+
+<p class="col">A shell script that converts an EPUB to a PDF using Calibre's <code>ebook-convert</code> with fixed settings, so every book comes out the same way. It takes either an <code>.epub</code> file or an unpacked EPUB folder, which is how Apple Books keeps its books.</p>
+
+<div class="figs">
+  <figure><img src="../../assets/img/epub-to-pdf-shot-epub-to-pdf.jpg" alt="Two pages of the PDF made from Project Gutenberg&#x27;s The Great God Pan by Arthur Machen: the cover and the contents." loading="lazy" /><figcaption>Two pages of the PDF made from Project Gutenberg's The Great God Pan by Arthur Machen: the cover and the contents.</figcaption></figure>
+</div>
+
+<div class="work-body">
+  <div class="prose col">
+<h2>Using it</h2>
+<p><code>epub-to-pdf book.epub</code> writes <code>book.pdf</code> in the current folder, or to a path given as the second argument, and prints where the PDF went. <code>make pdf EPUB=~/book.epub</code> does the same and puts the result in Downloads by default.</p>
+<h2>The fixed settings</h2>
+<ul>
+<li>Letter paper and a 12-point default font, both changeable through environment variables.</li>
+<li>Margins of 54 points on every side.</li>
+<li>Page numbers, and the cover kept at its own proportions.</li>
+</ul>
+<h2>Unpacked books</h2>
+<p>An Apple Books folder is zipped back into a proper EPUB first, following the format's rule that the <code>mimetype</code> file goes first and uncompressed. A folder that is not an EPUB, or one protected by DRM, is refused with a message rather than converted. If the conversion fails, the last lines of Calibre's log are shown.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>software / shell script</dd>
+    <dt>Needs</dt><dd>Calibre's ebook-convert<br>bash</dd>
+    <dt>Reads</dt><dd>an .epub file, or an unpacked EPUB folder as Apple Books stores them</dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>

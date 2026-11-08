@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>daimon · Caerjar</title>
+<meta name="description" content="A small coding agent that writes and edits code, runs your tests and reads your repository without leaving your computer: no keys, no network, no telemetry." />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>daimon</h1>
+  <p class="lede">A coding agent that runs entirely on your own machine</p>
+</div>
+
+<p class="col">A small coding agent that writes and edits code, runs your tests and reads your repository without leaving your computer: no keys, no network, no telemetry. It is one loop, written to be read and changed, with a fifth of its lines given to comments explaining why.</p>
+
+<div class="figs">
+  <figure><img src="../../assets/img/daimon-agent-shot-daimon-agent.jpg" alt="The browser tab: the agent reads wordcount.py with its read_file tool and explains what the script does when the file is missing." loading="lazy" /><figcaption>The browser tab: the agent reads wordcount.py with its read_file tool and explains what the script does when the file is missing.</figcaption></figure>
+</div>
+
+<div class="work-body">
+  <div class="prose col">
+<h2>The loop</h2>
+<p>The whole idea fits in a paragraph: send the conversation and the list of tools to a server running on the same machine, run whatever tools come back, add the results, and repeat until nothing more is asked for. It deliberately refuses to be a framework: no plugin system, no agent registry, no orchestration layer. The agent and the server that generates its replies are two separate processes joined by one standard protocol, so either can be swapped without touching the other.</p>
+<h2>Ways to run it</h2>
+<ul>
+<li><code>daimon -C ~/project</code>: the agent in a terminal, asking before anything that writes.</li>
+<li><code>daimon-web</code>: the same agent in a local browser tab, for long output, pasted screenshots and clicking back through past sessions.</li>
+<li><code>daimon-sandbox</code>: the agent inside Docker on a network with no route out, where its only reachable neighbour is a proxy to the local server.</li>
+<li><code>--mode plan</code>: exploration only, every write refused.</li>
+</ul>
+<h2>Permission</h2>
+<p>In the default mode it prompts before any tool that changes something, and lets through only shell commands that provably just read. The list of what runs without asking names whole invocations rather than programs, so <code>git log</code> runs unprompted while <code>git push --force</code> still asks. File tools are confined to the folders you open, and symlinks are resolved before the check so a link cannot lead out.</p>
+<h2>Memory</h2>
+<p>It keeps notes across sessions as plain markdown: cross-project facts in one folder, project notes in a <code>DAIMON.md</code> beside the code, both editable by hand. <code>--learn-git</code> reads your recent commits and writes the conventions it infers into that file, treated as a draft to correct. Every session is logged, and the agent can search those logs to find how something was fixed before.</p>
+<h2>Your own writing</h2>
+<p><code>daimon-corpus</code> gives it something to read besides code: essays, notes, a PDF library and old chat conversations. Nothing is indexed unless you add it. Every passage keeps a locator such as <code>d40:p12</code>, so a quote can be fetched back and checked rather than trusted. It records who wrote each passage, and only your own words are used to learn your voice.</p>
+<ul>
+<li><code>--learn-me</code> writes profiles of how you write and think, and every line must cite a passage it was actually shown or it is moved under <i>Unverified</i>.</li>
+<li><code>--as write</code>, <code>--as chat</code>, <code>--as artist</code> and <code>--as media</code> say what a session is for, and only those sessions may search and quote your corpus.</li>
+<li><code>--research</code> writes a cited report from your own library, and refuses to answer when it finds nothing.</li>
+<li><code>daimon-corpus coverage</code> counts passages and documents before any claim, and names what you would have to go and get when a subject is not covered.</li>
+</ul>
+<h2>Seeing and hearing</h2>
+<p>Images and screenshots go to a vision model that the agent calls as a tool, served from the same local endpoint as the coder, and only its answer enters the conversation, never the picture. Recordings dropped in the browser are transcribed on the spot, and a separate batch tool transcribes a whole folder on the host, skipping anything under thirty seconds because a drum hit transcribes into an invented sentence. A <code>check_page</code> tool loads a local page in a headless browser and returns its errors and visible text.</p>
+<h2>Measuring it</h2>
+<p>A fixed set of tasks runs again and again and reports a pass rate, and the check for each task runs the tests rather than asking the agent whether it succeeded. The first prompt change tried, an instruction to do only what was asked, looked right and made results measurably worse, and was dropped.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>software / command line / browser</dd>
+    <dt>Runs on</dt><dd>one Mac, with nothing sent off it<br>Python, two dependencies</dd>
+    <dt>Ways in</dt><dd>a terminal, a local browser tab, a sealed container</dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fieldkit · Caerjar</title>
+<meta name="description" content="Make your own apps for your research by describing what you want in plain words." />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>fieldkit</h1>
+  <p class="lede">A kit for making apps over your own research data by describing them in plain words</p>
+</div>
+
+<p class="col">Make your own apps for your research by describing what you want in plain words. A model writes the app; it only ever sees a made-up copy of the data, and the app that runs on the real data loads nothing from the internet but map tiles.</p>
+
+<div class="figs">
+  <figure><img src="../../assets/img/fieldkit-plate-fieldkit.svg" alt="A kit for making apps over your own research data by describing them in plain words" loading="lazy" /><figcaption>A kit for making apps over your own research data by describing them in plain words</figcaption></figure>
+</div>
+
+<div class="work-body">
+  <div class="prose col">
+<h2>Asking for an app</h2>
+<p>A new project starts with a simple notes browser. Bring my data takes a FileMaker export, spreadsheets in .csv or .xlsx, or notes and transcripts in .docx, .txt or .md. Requests are typed in ordinary words, such as "Show my notes on a timeline by month" or "Put the interview locations on a map", and the app beside them updates; Undo last change takes a step back. A brief in your own words is followed with every request, and screenshots, sketches on paper or links for inspiration are each turned into a written description that can be edited. Export app makes a folder that opens the app with a double-click on a Mac or a Windows computer, with no data, the made-up sample, or the real data inside.</p>
+<h2>Where the data goes</h2>
+<p>When data comes in, fieldkit makes a made-up copy with the same shape: the same columns, the same number of notes, the same headings, but invented words, shifted dates and fake locations. The model sees only that copy, the app's code, and the table and column names. The tools it is given cannot reach the real files. Open with my real data runs the app in your own browser, and nothing from that tab goes back to the model. If an app reads the real notes with a model, for example to summarise an interview, that goes only to a model running on your own computer.</p>
+<h2>How it holds</h2>
+<p>The model may read only the app and the sample folders and write only the app folder, and it has no shell. No word longer than three letters from the real data may appear in the sample. The app runs on three separate loopback servers (main, sample and real), so the browser's same-origin rules keep real data out of the chat. A canary test checks that the real data never reaches the model. Learners need no admin rights: the launcher sets itself up inside the kit folder, because many university machines block the usual installers.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>teaching / software / data</dd>
+    <dt>Runs on</dt><dd>Mac, started with a double-click; a Windows launcher is included</dd>
+    <dt>In</dt><dd>FileMaker exports, spreadsheets, notes and transcripts</dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>

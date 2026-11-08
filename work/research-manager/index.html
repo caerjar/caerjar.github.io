@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>research-manager · Caerjar</title>
+<meta name="description" content="A Mac app over a folder of markdown notes that answers one question: what does each of my threads need next?" />
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300..600&family=IBM+Plex+Sans:wght@500;600&display=swap" />
+<link rel="stylesheet" href="../../assets/site.css" />
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="../../"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="3" fill="currentColor"/></svg>Caerjar</a>
+  <nav aria-label="Pages"><a href="../../offerings/">What we do</a><a href="../../#selected-work">Selected work</a><a href="../../#write">Get in touch</a></nav>
+</header>
+
+<main class="work">
+<div class="col">
+  <h1>research-manager</h1>
+  <p class="lede">A Mac app for deciding what each research thread needs next</p>
+</div>
+
+<p class="col">A Mac app over a folder of markdown notes that answers one question: what does each of my threads need next? It reads the notes, keeps no facts of its own, and every change it makes is either a git commit or, in a folder without git, an undo snapshot that can be put back.</p>
+
+<div class="figs">
+  <figure><img src="../../assets/img/research-manager-plate-research-manager.svg" alt="A Mac app for deciding what each research thread needs next" loading="lazy" /><figcaption>A Mac app for deciding what each research thread needs next</figcaption></figure>
+</div>
+
+<div class="work-body">
+  <div class="prose col">
+<h2>Deciding</h2>
+<ul>
+<li><b>Needs</b> lists what every thread needs next, grouped by verb ("Write what you heard", "File what this run produced"), with the evidence under each: a path, a count, a commit you can look at.</li>
+<li><b>Worth a Look</b> gives named reasons a thread deserves attention, each with the evidence that fired it, and never a score.</li>
+<li><b>Gone Quiet</b> orders notes by how long since they were worked on.</li>
+<li><b>Today</b> gathers the morning: what is due this week, what each project is waiting on, and the threads saved in the last three days.</li>
+</ul>
+<h2>Moving a thread</h2>
+<p>The <b>Board</b> sets threads in columns in the order work moves, from Draft through Active and Finished to Dormant and Archived. After a move, a line asks why ("Why take it up now?", "What did it produce?", "Why set it down?"), and an answer goes into an append-only decision log that is never edited or deleted. Promoting a thread into a project (code, engineering, writing or a science experiment) is proposed by the app and confirmed by you.</p>
+<h2>Working a thread</h2>
+<p>Notes open in Read or Edit, and a save is one commit. An open question can be answered in place, and a task ticked, and both are written straight into the note. <b>Fetch</b> takes a URL and holds the page in quarantine, outside the notes, until you add it to a thread. <b>Workflows</b> keeps the vault's own recipes and every run of each.</p>
+<h2>How it is built</h2>
+<p>The app is a native SwiftUI shell over a Rust core, and the Swift layer holds no logic. Once its image is built, the core is tested in a container with no network, and every invariant can be reached without Xcode. The app runs in the macOS App Sandbox, reaches the notes only through a folder you choose, and takes no third-party Swift packages. The chat backend starts unset, so nothing is sent until you choose one, and every request names the notes it sent, shown beside the answer.</p>
+  </div>
+  <dl class="facts">
+    <dt>Year</dt><dd>2026</dd>
+    <dt>Medium</dt><dd>macOS app / SwiftUI / Rust</dd>
+    <dt>Runs on</dt><dd>macOS: a SwiftUI app over a Rust core</dd>
+    <dt>Reads</dt><dd>a folder of markdown notes, under git or not</dd>
+  </dl>
+</div>
+
+<ul class="work-links">
+    <li><span>Repository: private</span></li>
+</ul>
+
+</main>
+
+<footer><a href="../../">Caerjar</a><a href="mailto:hi@caerjar.com">hi@caerjar.com</a></footer>
+</div>
+</body>
+</html>
