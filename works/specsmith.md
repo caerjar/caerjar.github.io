@@ -14,7 +14,7 @@ label = "Out"
 value = "a specification, feature matrix, wireframes, and HTML and PDF documentation, with source references available for review"
 
 [[links]]
-label = "Discuss a research or specification workflow"
+label = "Email us about a research or specification workflow"
 url = "mailto:hi@caerjar.com"
 +++
 Specsmith assembles a specification from transcripts, design material, existing code, and recorded decisions. Each retained claim includes a quotation and source location that the software checks against the supplied material.
