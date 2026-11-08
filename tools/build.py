@@ -95,6 +95,7 @@ def image(slug, src, base):
 def build(slug, card):
     path, base = source(slug, card)
     head, body = md.split(path.read_text())
+    head["title"] = head["title"][0].upper() + head["title"][1:]  # project names are capitalized on this site
     lead, prose = md.page_parts(body)
     esc = lambda s: html.escape(s, quote=True)
 
