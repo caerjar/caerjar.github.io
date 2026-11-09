@@ -20,10 +20,10 @@ import md
 
 # The works on Caerjar, in the order the Work page lists them.
 WORKS = [
-    "daimon-agent", "local-models", "research-manager", "vetiver",
+    "daimon-agent", "local-models", "research-manager",
     "caer-stack",
     "meridian", "corpusmith",
-    "specsmith", "earshot", "training", "fieldkit", "epub-to-pdf", "screenplay-formatter", "drone-cinematographer",
+    "specsmith", "earshot", "training", "fieldkit", "epub-to-pdf", "screenplay-formatter",
 ]
 
 HEAD = """<!DOCTYPE html>
