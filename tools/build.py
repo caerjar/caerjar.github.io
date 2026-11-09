@@ -23,7 +23,7 @@ WORKS = [
     "daimon-agent", "local-models", "research-manager",
     "caer-stack",
     "meridian", "corpusmith",
-    "specsmith", "earshot", "training", "fieldkit", "epub-to-pdf", "screenplay-formatter",
+    "specsmith", "earshot", "training", "fieldkit", "epub-to-pdf", "screenplay-formatter", "drone-cinematographer", "bloomcast",
 ]
 
 HEAD = """<!DOCTYPE html>
