@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Build Caerjar's own work pages at work/<slug>/ from each work's work.md.
+"""Build Caerjar's own work pages at work/<slug>/ from works/<slug>.md.
 
-The same work.md also feeds eonmeridian.github.io, so one edit updates both sites.
-Text is used as written; nothing is added. Each work's private vault card says where
-its work.md lives (repo: ...), exactly as the portfolio build reads it.
+Caerjar owns these works: their text and images live in this repo, and they do not
+appear on eonmeridian.github.io. Text is used as written; nothing is added.
 
 Run: python3 tools/build.py
 """
@@ -16,9 +15,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 VAULT = ROOT.parent.parent                       # ~/caerjar/vault
 PORTFOLIO = VAULT / "code" / "eonmeridian.github.io"
-CARDS = VAULT / "researcher" / "research" / "projects"
-sys.path.insert(0, str(PORTFOLIO / "tools"))
-import md  # the portfolio's work.md reader, so both sites read the format the same way
+sys.path.insert(0, str(ROOT / "tools"))
+import md
 
 # The works on Caerjar, in the order the Work page lists them.
 WORKS = [
@@ -57,43 +55,27 @@ FOOT = """
 """
 
 
-def cards():
-    out = {}
-    for f in sorted(CARDS.glob("*/index.md")):
-        fm = md.card_frontmatter(f.read_text())
-        if fm.get("slug"):
-            fm["_dir"] = f.parent
-            out[fm["slug"]] = fm
-    return out
-
-
-def source(slug, card):
-    """The work.md for a work: works/<slug>.md here (Caerjar only), else in its repo,
-    or beside its card when it has no repo."""
+def source(slug):
+    """Each work's copy lives here, in works/<slug>.md. Caerjar owns its works."""
     own = ROOT / "works" / f"{slug}.md"
-    if own.exists():
-        return own, ROOT
-    if card is None or card.get("site") != "page":
-        sys.exit(f"{slug}: its card is not site: page, so it stays off the site")
-    repo = pathlib.Path(card.get("repo") or "none").expanduser()
-    if repo.is_dir() and (repo / "work.md").exists():
-        return repo / "work.md", repo
-    if (card["_dir"] / "work.md").exists():
-        return card["_dir"] / "work.md", repo if repo.is_dir() else card["_dir"]
-    sys.exit(f"{slug}: no work.md")
+    if not own.exists():
+        sys.exit(f"{slug}: no works/{slug}.md")
+    return own, ROOT
 
 
 def image(slug, src, base):
     """Copy one image into assets/img/ and return its path from a work page."""
-    f = PORTFOLIO / src if src.startswith("assets/") else base / src
+    f = base / src
+    if f.parent == ROOT / "assets" / "img":
+        return f"../../assets/img/{f.name}"
     dest = ROOT / "assets" / "img" / f"{slug}-{f.name}"
     dest.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(f, dest)
     return f"../../assets/img/{dest.name}"
 
 
-def build(slug, card):
-    path, base = source(slug, card)
+def build(slug):
+    path, base = source(slug)
     head, body = md.split(path.read_text())
     head["title"] = head["title"][0].upper() + head["title"][1:]  # project names are capitalized on this site
     lead, prose = md.page_parts(body)
@@ -101,9 +83,7 @@ def build(slug, card):
 
     imgs = [(i["src"], i["caption"]) for i in head.get("images", [])]
     imgs += [(i["src"], i["caption"]) for i in head.get("optional_images", [])
-             if (base / i["src"]).exists() or (PORTFOLIO / i["src"]).exists()]
-    if not imgs and (PORTFOLIO / f"assets/img/plate-{slug}.svg").exists():
-        imgs = [(f"assets/img/plate-{slug}.svg", head.get("sub", head["title"]))]
+             if (base / i["src"]).exists()]
     own = ROOT / "assets" / "plates" / f"{slug}.svg"  # a plate drawn for this site replaces any other
     if own.exists():
         imgs = [(str(own), imgs[0][1] if imgs else head.get("sub", head["title"]))]
@@ -157,11 +137,10 @@ def private_terms():
 
 
 if __name__ == "__main__":
-    c = cards()
     terms = private_terms()
     problems = []
     for slug in WORKS:
-        out, text = build(slug, c.get(slug))
+        out, text = build(slug)
         visible = re.sub(r"<!--.*?-->", "", text, flags=re.S)
         if chr(0x2014) in visible:
             problems.append(f"{out.relative_to(ROOT)}: em-dash")
