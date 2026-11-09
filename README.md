@@ -19,7 +19,7 @@ Copy source: `~/caerjar/drafts/website-and-tenor-2027/caerjar-website.md` (2026-
 
 ## Content
 
-- **Mission** (Eon's words): "Caerjar's mission is to build technology that expands human and collective autonomy." Followed by "We help our clients own the tools they depend on." The first is the Home headline.
+- **Headline** (Eon's words): "We build technology that expands what people and communities can do for themselves."
 - **Offerings**: three. Care (herbal and community health) and commissions (installations, performance,
   editions) are not offered for hire on this site; that work stays on the Work page.
 - **Works**: every work listed is a real work with a page on eonmeridian.github.io; its one line is
